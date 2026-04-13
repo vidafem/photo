@@ -115,6 +115,9 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function getOverlayValues() {
     const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
+    // Simulación de código plus y dirección (en el futuro se puede hacer reverse geocoding)
+    const plusCode = geoData.lat && geoData.lng ? getPlusCode(geoData.lat, geoData.lng) : "R4F4+GQH";
+    const direccion = "Guayaquil 090512, Ecuador 1EA1E8";
     return {
       local: formatTime(localClock),
       gtm: formatTime(gtmClock),
@@ -122,7 +125,9 @@ window.addEventListener('DOMContentLoaded', () => {
       date: formatDotDate(localClock),
       lat: geoData.lat,
       lng: geoData.lng,
-      alt: geoData.alt
+      alt: geoData.alt,
+      plusCode,
+      direccion
     };
   }
   function restartClock() {
@@ -148,39 +153,60 @@ window.addEventListener('DOMContentLoaded', () => {
     const values = getOverlayValues();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-    // Franja negra ocupa todo el ancho inferior
+    // --- Medidas y estilos ---
     const boxX = 0;
     const boxWidth = canvas.width;
-    const boxHeight = Math.max(102, Math.round(canvas.height * 0.2));
+    const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
-    const padding = Math.max(18, Math.round(canvas.width * 0.03));
-    const labelFontSize = Math.max(14, Math.round(canvas.width * 0.021));
-    const valueFontSize = Math.max(22, Math.round(canvas.width * 0.048));
     ctx.save();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.62)";
+    ctx.fillStyle = "rgba(0,0,0,0.72)";
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-    const leftX = boxX + padding;
-    const rightX = boxX + boxWidth * 0.53;
-    const firstRowY = boxY + padding + labelFontSize;
-    const secondRowY = firstRowY + valueFontSize + labelFontSize + 18;
-    drawOverlayLabelValue("Local", values.local, leftX, firstRowY, labelFontSize, valueFontSize);
-    drawOverlayLabelValue("GTM", values.gtm, leftX, secondRowY, labelFontSize, valueFontSize);
-    drawOverlayLabelValue("Dia", values.day, rightX, firstRowY, labelFontSize, valueFontSize);
-    drawOverlayLabelValue("Fecha", values.date, rightX, secondRowY, labelFontSize, valueFontSize);
-    // Segunda fila: Lat/Lng/Alt centrados
-    const geoFont = `600 ${Math.max(18, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
-    ctx.font = geoFont;
+
+    // --- Primera línea: Plus code y dirección ---
+    const plusFont = `600 ${Math.max(22, Math.round(canvas.width * 0.045))}px ${canvasFontStack}`;
+    ctx.font = plusFont;
     ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
-    const geoY = boxY + boxHeight - padding + 8;
-    let geoText = "";
-    if (values.lat && values.lng) {
-      geoText = `Lat: ${values.lat.toFixed(7)}   Lng: ${values.lng.toFixed(7)}`;
-      if (!isNaN(values.alt)) geoText += `   Alt: ${values.alt.toFixed(1)}m`;
-    }
-    if (geoText) ctx.fillText(geoText, boxX + boxWidth / 2, geoY);
+    const plusY = boxY + Math.max(32, Math.round(boxHeight * 0.22));
+    ctx.fillText(`${values.plusCode}, ${values.direccion}`, boxX + boxWidth / 2, plusY);
+
+    // --- Segunda línea: etiquetas y valores ---
+    const labelFont = `500 ${Math.max(13, Math.round(canvas.width * 0.022))}px ${canvasFontStack}`;
+    const valueFont = `600 ${Math.max(18, Math.round(canvas.width * 0.032))}px ${canvasFontStack}`;
+    const sectionY = plusY + Math.max(18, Math.round(boxHeight * 0.18));
+    const colPad = Math.max(32, Math.round(boxWidth * 0.04));
+    const colWidth = (boxWidth - colPad * 2) / 2;
+    // Izquierda
     ctx.textAlign = "left";
+    ctx.font = labelFont;
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Latitude", boxX + colPad, sectionY);
+    ctx.font = valueFont;
+    ctx.fillText(values.lat !== null ? values.lat.toFixed(15) + "°" : "-", boxX + colPad, sectionY + Math.max(22, Math.round(boxHeight * 0.16)));
+    ctx.font = labelFont;
+    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(52, Math.round(boxHeight * 0.38)));
+    ctx.font = valueFont;
+    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(72, Math.round(boxHeight * 0.54)));
+    // Derecha
+    ctx.textAlign = "right";
+    ctx.font = labelFont;
+    ctx.fillText("Longitude", boxX + boxWidth - colPad, sectionY);
+    ctx.font = valueFont;
+    ctx.fillText(values.lng !== null ? values.lng.toFixed(15) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(22, Math.round(boxHeight * 0.16)));
+    ctx.font = labelFont;
+    ctx.fillText("Altitude", boxX + boxWidth - colPad, sectionY + Math.max(52, Math.round(boxHeight * 0.38)));
+    ctx.font = valueFont;
+    ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, sectionY + Math.max(72, Math.round(boxHeight * 0.54)));
+    // --- Línea inferior: día y fecha ---
+    ctx.textAlign = "right";
+    ctx.font = labelFont;
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, boxY + boxHeight - Math.max(16, Math.round(boxHeight * 0.10)));
     ctx.restore();
+  // --- Utilidad para simular código plus (placeholder) ---
+  function getPlusCode(lat, lng) {
+    // Esto es solo un placeholder, para producción usar una librería de Plus Codes
+    return "R4F4+GQH";
+  }
   }
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
