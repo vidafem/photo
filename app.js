@@ -1,4 +1,8 @@
 const photoInput = document.getElementById("photoInput");
+const startScreen = document.getElementById("startScreen");
+const editorShell = document.getElementById("editorShell");
+const startUploadBtn = document.getElementById("startUploadBtn");
+const changePhotoBtn = document.getElementById("changePhotoBtn");
 const brandName = document.getElementById("brandName");
 const fullName = document.getElementById("fullName");
 const docId = document.getElementById("docId");
@@ -119,6 +123,9 @@ function loadSelectedFile(file) {
     hasImage = true;
     drawWatermark();
 
+    startScreen.classList.add("hidden");
+    editorShell.classList.remove("hidden");
+
     canvas.style.display = "block";
     emptyState.style.display = "none";
     downloadBtn.disabled = false;
@@ -128,6 +135,13 @@ function loadSelectedFile(file) {
 
   sourceImage.src = objectUrl;
 }
+
+function requestPhotoSelection() {
+  photoInput.click();
+}
+
+startUploadBtn.addEventListener("click", requestPhotoSelection);
+changePhotoBtn.addEventListener("click", requestPhotoSelection);
 
 photoInput.addEventListener("change", (event) => {
   const file = event.target.files?.[0];

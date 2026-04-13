@@ -10,19 +10,27 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
+  <input id="photoInput" class="visually-hidden" type="file" accept="image/*">
+
+  <main class="start-screen" id="startScreen">
+    <p class="eyebrow">Edición local y privada</p>
+    <h1>Sube tu foto para empezar</h1>
+    <p class="subtitle">La imagen se procesa en tu navegador y no se guarda en ningún servidor.</p>
+    <button id="startUploadBtn" type="button" class="start-upload-btn">Seleccionar foto</button>
+  </main>
+
+  <main class="app-shell hidden" id="editorShell">
     <header class="hero">
-      <p class="eyebrow">Edición local y privada</p>
+      <p class="eyebrow">Editor activo</p>
       <h1>Marca de agua instantánea para tus fotos</h1>
-      <p class="subtitle">Sube una imagen, agrega datos precisos y descarga el resultado. Nada se almacena en servidor.</p>
+      <p class="subtitle">Completa tus datos específicos y descarga la imagen final.</p>
     </header>
 
     <section class="workspace" aria-label="Editor de imagen">
       <div class="panel controls-panel">
         <h2>Datos de marca</h2>
 
-        <label for="photoInput" class="input-label">Foto</label>
-        <input id="photoInput" type="file" accept="image/*">
+        <button id="changePhotoBtn" type="button" class="ghost-btn">Cambiar foto</button>
 
         <label for="brandName" class="input-label">Marca / Empresa</label>
         <input id="brandName" type="text" placeholder="VIDAFEM LABS" maxlength="40">
