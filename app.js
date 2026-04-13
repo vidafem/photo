@@ -1,8 +1,26 @@
-// Leaflet modal/mapa
+
+// Elementos del DOM (declarar todos antes de usarlos)
+const photoInput = document.getElementById("photoInput");
+const startScreen = document.getElementById("startScreen");
+const editorShell = document.getElementById("editorShell");
+const startUploadBtn = document.getElementById("startUploadBtn");
+const changePhotoBtn = document.getElementById("changePhotoBtn");
+const dateInput = document.getElementById("dateInput");
+const localTimeInput = document.getElementById("localTimeInput");
+const refreshBtn = document.getElementById("refreshBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const canvas = document.getElementById("previewCanvas");
+const emptyState = document.getElementById("emptyState");
+const latitudeInput = document.getElementById("latitudeInput");
+const longitudeInput = document.getElementById("longitudeInput");
+const altitudeInput = document.getElementById("altitudeInput");
+const openMapBtn = document.getElementById("openMapBtn");
 const mapModal = document.getElementById("mapModal");
 const leafletMapDiv = document.getElementById("leafletMap");
 const acceptMapBtn = document.getElementById("acceptMapBtn");
 const closeMapBtn = document.getElementById("closeMapBtn");
+
+// Variables de estado para Leaflet
 let leafletMap = null;
 let leafletMarker = null;
 let tempLatLng = null;
