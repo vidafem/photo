@@ -1,3 +1,63 @@
+// Leaflet modal/mapa
+const mapModal = document.getElementById("mapModal");
+const leafletMapDiv = document.getElementById("leafletMap");
+const acceptMapBtn = document.getElementById("acceptMapBtn");
+const closeMapBtn = document.getElementById("closeMapBtn");
+let leafletMap = null;
+let leafletMarker = null;
+let tempLatLng = null;
+
+function openMapModal() {
+  mapModal.classList.remove("hidden");
+  setTimeout(() => {
+    if (!leafletMap) {
+      leafletMap = L.map("leafletMap").setView([
+        geoData.lat || 4.65,
+        geoData.lng || -74.1
+      ], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(leafletMap);
+      leafletMarker = L.marker([
+        geoData.lat || 4.65,
+        geoData.lng || -74.1
+      ], { draggable: true }).addTo(leafletMap);
+      leafletMarker.on('dragend', (e) => {
+        tempLatLng = leafletMarker.getLatLng();
+      });
+      leafletMap.on('click', (e) => {
+        leafletMarker.setLatLng(e.latlng);
+        tempLatLng = e.latlng;
+      });
+    } else {
+      leafletMap.setView([
+        geoData.lat || 4.65,
+        geoData.lng || -74.1
+      ], 15);
+      leafletMarker.setLatLng([
+        geoData.lat || 4.65,
+        geoData.lng || -74.1
+      ]);
+      tempLatLng = leafletMarker.getLatLng();
+      leafletMap.invalidateSize();
+    }
+  }, 100);
+}
+
+function closeMapModal() {
+  mapModal.classList.add("hidden");
+}
+
+openMapBtn?.addEventListener("click", openMapModal);
+closeMapBtn?.addEventListener("click", closeMapModal);
+
+acceptMapBtn?.addEventListener("click", () => {
+  if (leafletMarker) {
+    const pos = tempLatLng || leafletMarker.getLatLng();
+    setGeoInputs(pos.lat, pos.lng, geoData.alt);
+  }
+  closeMapModal();
+});
 const photoInput = document.getElementById("photoInput");
 const startScreen = document.getElementById("startScreen");
 const editorShell = document.getElementById("editorShell");
@@ -16,6 +76,55 @@ let hasImage = false;
 let localClock = new Date();
 let clockIntervalId = null;
 const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
+
+const latitudeInput = document.getElementById("latitudeInput");
+const longitudeInput = document.getElementById("longitudeInput");
+const altitudeInput = document.getElementById("altitudeInput");
+const openMapBtn = document.getElementById("openMapBtn");
+
+let geoData = {
+  lat: null,
+  lng: null,
+  alt: null
+};
+
+// Obtener ubicación automáticamente
+function setGeoInputs(lat, lng, alt) {
+  latitudeInput.value = lat?.toFixed(7) || "";
+  longitudeInput.value = lng?.toFixed(7) || "";
+  altitudeInput.value = alt !== undefined && alt !== null ? Number(alt).toFixed(1) : "";
+  geoData.lat = Number(latitudeInput.value);
+  geoData.lng = Number(longitudeInput.value);
+  geoData.alt = Number(altitudeInput.value);
+  drawWatermark();
+}
+
+function getLocation() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      setGeoInputs(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+    },
+    (err) => {
+      // Si falla, deja los campos vacíos
+      setGeoInputs(null, null, null);
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+latitudeInput?.addEventListener("input", () => {
+  geoData.lat = Number(latitudeInput.value);
+  drawWatermark();
+});
+longitudeInput?.addEventListener("input", () => {
+  geoData.lng = Number(longitudeInput.value);
+  drawWatermark();
+});
+altitudeInput?.addEventListener("input", () => {
+  geoData.alt = Number(altitudeInput.value);
+  drawWatermark();
+});
 
 function pad2(value) {
   return String(value).padStart(2, "0");
@@ -95,17 +204,17 @@ function drawWatermark() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  const margin = Math.max(10, Math.round(canvas.width * 0.02));
-  const boxX = margin;
-  const boxWidth = canvas.width - margin * 2;
+  // Franja negra ocupa todo el ancho inferior
+  const boxX = 0;
+  const boxWidth = canvas.width;
   const boxHeight = Math.max(102, Math.round(canvas.height * 0.2));
-  const boxY = canvas.height - boxHeight - margin;
-  const padding = Math.max(12, Math.round(canvas.width * 0.02));
-  const labelFontSize = Math.max(12, Math.round(canvas.width * 0.018));
-  const valueFontSize = Math.max(20, Math.round(canvas.width * 0.043));
+  const boxY = canvas.height - boxHeight;
+  const padding = Math.max(18, Math.round(canvas.width * 0.03));
+  const labelFontSize = Math.max(14, Math.round(canvas.width * 0.021));
+  const valueFontSize = Math.max(22, Math.round(canvas.width * 0.048));
 
   ctx.save();
-  ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.62)";
   ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
   const leftX = boxX + padding;
@@ -117,6 +226,20 @@ function drawWatermark() {
   drawOverlayLabelValue("GTM", values.gtm, leftX, secondRowY, labelFontSize, valueFontSize);
   drawOverlayLabelValue("Dia", values.day, rightX, firstRowY, labelFontSize, valueFontSize);
   drawOverlayLabelValue("Fecha", values.date, rightX, secondRowY, labelFontSize, valueFontSize);
+
+  // Segunda fila: Lat/Lng/Alt centrados
+  const geoFont = `600 ${Math.max(18, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+  ctx.font = geoFont;
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  const geoY = boxY + boxHeight - padding + 8;
+  let geoText = "";
+  if (values.lat && values.lng) {
+    geoText = `Lat: ${values.lat.toFixed(7)}   Lng: ${values.lng.toFixed(7)}`;
+    if (!isNaN(values.alt)) geoText += `   Alt: ${values.alt.toFixed(1)}m`;
+  }
+  if (geoText) ctx.fillText(geoText, boxX + boxWidth / 2, geoY);
+  ctx.textAlign = "left";
 
   ctx.restore();
 }
@@ -144,6 +267,9 @@ function loadSelectedFile(file) {
     showEditorWithSwipe();
     drawWatermark();
 
+    // Obtener ubicación al cargar imagen
+    getLocation();
+
     canvas.style.display = "block";
     emptyState.style.display = "none";
     downloadBtn.disabled = false;
@@ -160,6 +286,13 @@ function requestPhotoSelection() {
 
 setInitialDateTimeInputs();
 restartClock();
+
+// Si ya hay valores en los inputs, los toma como iniciales
+if (latitudeInput && longitudeInput && altitudeInput) {
+  geoData.lat = Number(latitudeInput.value);
+  geoData.lng = Number(longitudeInput.value);
+  geoData.alt = Number(altitudeInput.value);
+}
 
 startUploadBtn.addEventListener("click", requestPhotoSelection);
 changePhotoBtn.addEventListener("click", requestPhotoSelection);

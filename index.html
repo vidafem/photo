@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="version-banner">Versión: 2026-04-13-LeafletMap</div>
   <input id="photoInput" class="visually-hidden" type="file" accept="image/*">
 
   <main class="start-screen" id="startScreen">
@@ -36,6 +37,19 @@
         <input id="localTimeInput" type="time" step="60">
         <p class="hint">Los segundos avanzan automáticamente en tiempo real.</p>
 
+        <div class="geo-fields">
+          <label for="latitudeInput" class="input-label">Latitud</label>
+          <input id="latitudeInput" type="number" step="any" placeholder="Latitud" autocomplete="off">
+
+          <label for="longitudeInput" class="input-label">Longitud</label>
+          <input id="longitudeInput" type="number" step="any" placeholder="Longitud" autocomplete="off">
+
+          <label for="altitudeInput" class="input-label">Altitud (m)</label>
+          <input id="altitudeInput" type="number" step="any" placeholder="Altitud" autocomplete="off">
+
+          <button id="openMapBtn" type="button" class="ghost-btn">Elegir en el mapa</button>
+        </div>
+
         <div class="actions">
           <button id="refreshBtn" type="button">Actualizar franja</button>
           <button id="downloadBtn" type="button" disabled>Descargar imagen</button>
@@ -52,6 +66,19 @@
     </section>
   </main>
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+
+  <!-- Modal del mapa -->
+  <div id="mapModal" class="map-modal hidden">
+    <div class="map-modal-content">
+      <div id="leafletMap" class="leaflet-map"></div>
+      <div class="map-modal-actions">
+        <button id="acceptMapBtn" type="button">Aceptar punto</button>
+        <button id="closeMapBtn" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

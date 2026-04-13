@@ -1,3 +1,70 @@
+/* Banner de versión */
+.version-banner {
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  background: #222c;
+  color: #fff;
+  font-size: 0.98rem;
+  font-family: var(--font-system);
+  text-align: center;
+  padding: 0.38rem 0;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 12px #0002;
+  user-select: none;
+}
+body { padding-top: 2.2rem; }
+/* Modal Leaflet */
+.map-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-modal.hidden {
+  display: none;
+}
+.map-modal-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 0.5rem 0.5rem 0.8rem;
+  min-width: min(96vw, 420px);
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.leaflet-map {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  margin-bottom: 0.7rem;
+}
+.map-modal-actions {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: flex-end;
+}
+.map-modal-actions button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-system);
+}
+.map-modal-actions button:last-child {
+  background: #e0e0e0;
+  color: #222;
+}
 :root {
   --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --bg: #f2f2f7;
