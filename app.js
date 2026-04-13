@@ -3,8 +3,9 @@
   logoImg.src = 'mapcam.webp';
   let logoLoaded = false;
   logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
+
 window.addEventListener('DOMContentLoaded', () => {
-  // Elementos del DOM
+  // --- Declaración de variables y elementos DOM ---
   const photoInput = document.getElementById("photoInput");
   const startScreen = document.getElementById("startScreen");
   const editorShell = document.getElementById("editorShell");
@@ -24,29 +25,41 @@ window.addEventListener('DOMContentLoaded', () => {
   const leafletMapDiv = document.getElementById("leafletMap");
   const acceptMapBtn = document.getElementById("acceptMapBtn");
   const closeMapBtn = document.getElementById("closeMapBtn");
-  // --- Utilidad para simular código plus (placeholder) ---
-  function getPlusCode(lat, lng) {
-    // Esto es solo un placeholder, para producción usar una librería de Plus Codes
-    return "R4F4+GQH";
-  }
 
+  // --- Estado global ---
   const ctx = canvas.getContext("2d");
   const sourceImage = new Image();
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
   const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
-
   let geoData = {
     lat: null,
     lng: null,
-    alt: null
+    alt: null,
+    plusCode: null,
+    direccion: null
   };
-
+  // Logo
+  const logoImg = new window.Image();
+  logoImg.src = 'mapcam.webp';
+  let logoLoaded = false;
+  logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
   // Leaflet
   let leafletMap = null;
   let leafletMarker = null;
   let tempLatLng = null;
+
+  // --- Utilidades ---
+  function getPlusCode(lat, lng) {
+    // Placeholder, para producción usar librería oficial
+    return "R4F4+GQH";
+  }
+  function countryCodeToFlag(cc) {
+    return cc
+      .toUpperCase()
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+  }
 
   function openMapModal() {
     mapModal.classList.remove("hidden");
@@ -129,7 +142,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function getOverlayValues() {
     const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
-    // Dirección y plus code automáticos
     return {
       local: formatTime(localClock),
       gtm: formatTime(gtmClock),
@@ -141,6 +153,34 @@ window.addEventListener('DOMContentLoaded', () => {
       plusCode: geoData.plusCode || "R4F4+GQH",
       direccion: geoData.direccion || "Guayaquil 090512, Ecuador 🇪🇨"
     };
+  }
+
+  // --- Geocodificación inversa y plus code ---
+  async function updateGeoData(lat, lng) {
+    // Plus code
+    try {
+      const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
+      const plusCodeData = await plusCodeResp.json();
+      geoData.plusCode = plusCodeData.global_code || getPlusCode(lat, lng);
+    } catch {
+      geoData.plusCode = getPlusCode(lat, lng);
+    }
+    // Dirección
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+      const data = await resp.json();
+      let ciudad = data.address.city || data.address.town || data.address.village || "";
+      let cp = data.address.postcode || "";
+      let pais = data.address.country || "";
+      let bandera = "";
+      if (data.address.country_code) {
+        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
+      }
+      geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
+    } catch {
+      geoData.direccion = "";
+    }
+    drawWatermark();
   }
   function restartClock() {
     localClock = getLocalClockFromInputs();
@@ -189,36 +229,44 @@ window.addEventListener('DOMContentLoaded', () => {
     const plusY = boxY + Math.max(32, Math.round(boxHeight * 0.22));
     ctx.fillText(`${values.plusCode}, ${values.direccion}`, boxX + boxWidth / 2, plusY);
 
-    // --- Segunda línea: etiquetas y valores ---
+    // --- Segunda línea: Latitude y Longitude ---
     const labelFont = `500 ${Math.max(13, Math.round(canvas.width * 0.022))}px ${canvasFontStack}`;
     const valueFont = `600 ${Math.max(18, Math.round(canvas.width * 0.032))}px ${canvasFontStack}`;
     const sectionY = plusY + Math.max(18, Math.round(boxHeight * 0.18));
     const colPad = Math.max(32, Math.round(boxWidth * 0.04));
-    // Izquierda
+    // Latitude
     ctx.textAlign = "left";
     ctx.font = labelFont;
     ctx.fillStyle = "#fff";
     ctx.fillText("Latitude", boxX + colPad, sectionY);
     ctx.font = valueFont;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(15) + "°" : "-", boxX + colPad, sectionY + Math.max(22, Math.round(boxHeight * 0.16)));
-    ctx.font = labelFont;
-    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(52, Math.round(boxHeight * 0.38)));
-    ctx.font = valueFont;
-    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(72, Math.round(boxHeight * 0.54)));
-    // Derecha
+    // Longitude
     ctx.textAlign = "right";
     ctx.font = labelFont;
     ctx.fillText("Longitude", boxX + boxWidth - colPad, sectionY);
     ctx.font = valueFont;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(15) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(22, Math.round(boxHeight * 0.16)));
+
+    // --- Tercera línea: Local/GMT y Altitude/Fecha ---
+    // Local y GMT (izquierda, uno debajo del otro)
+    ctx.textAlign = "left";
+    ctx.font = labelFont;
+    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(52, Math.round(boxHeight * 0.38)));
+    ctx.font = valueFont;
+    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(72, Math.round(boxHeight * 0.54)));
+    ctx.font = labelFont;
+    ctx.fillText("GMT", boxX + colPad, sectionY + Math.max(92, Math.round(boxHeight * 0.62)));
+    ctx.font = valueFont;
+    ctx.fillText(values.gtm, boxX + colPad, sectionY + Math.max(112, Math.round(boxHeight * 0.74)));
+    // Altitude y fecha (derecha, uno debajo del otro)
+    ctx.textAlign = "right";
     ctx.font = labelFont;
     ctx.fillText("Altitude", boxX + boxWidth - colPad, sectionY + Math.max(52, Math.round(boxHeight * 0.38)));
     ctx.font = valueFont;
     ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, sectionY + Math.max(72, Math.round(boxHeight * 0.54)));
-    // --- Línea inferior: día y fecha ---
-    ctx.textAlign = "right";
     ctx.font = labelFont;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, boxY + boxHeight - Math.max(16, Math.round(boxHeight * 0.10)));
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, sectionY + Math.max(112, Math.round(boxHeight * 0.74)));
     ctx.restore();
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
