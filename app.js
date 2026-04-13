@@ -69,6 +69,10 @@ const refreshBtn = document.getElementById("refreshBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const canvas = document.getElementById("previewCanvas");
 const emptyState = document.getElementById("emptyState");
+const latitudeInput = document.getElementById("latitudeInput");
+const longitudeInput = document.getElementById("longitudeInput");
+const altitudeInput = document.getElementById("altitudeInput");
+const openMapBtn = document.getElementById("openMapBtn");
 
 const ctx = canvas.getContext("2d");
 const sourceImage = new Image();
@@ -76,12 +80,6 @@ let hasImage = false;
 let localClock = new Date();
 let clockIntervalId = null;
 const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
-
-const latitudeInput = document.getElementById("latitudeInput");
-const longitudeInput = document.getElementById("longitudeInput");
-const altitudeInput = document.getElementById("altitudeInput");
-const openMapBtn = document.getElementById("openMapBtn");
-
 let geoData = {
   lat: null,
   lng: null,
