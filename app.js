@@ -3,15 +3,9 @@ const startScreen = document.getElementById("startScreen");
 const editorShell = document.getElementById("editorShell");
 const startUploadBtn = document.getElementById("startUploadBtn");
 const changePhotoBtn = document.getElementById("changePhotoBtn");
-const brandName = document.getElementById("brandName");
-const fullName = document.getElementById("fullName");
-const docId = document.getElementById("docId");
-const timestamp = document.getElementById("timestamp");
-const customCode = document.getElementById("customCode");
-const position = document.getElementById("position");
-const opacity = document.getElementById("opacity");
-const opacityValue = document.getElementById("opacityValue");
-const applyBtn = document.getElementById("applyBtn");
+const dateInput = document.getElementById("dateInput");
+const localTimeInput = document.getElementById("localTimeInput");
+const refreshBtn = document.getElementById("refreshBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const canvas = document.getElementById("previewCanvas");
 const emptyState = document.getElementById("emptyState");
@@ -19,94 +13,120 @@ const emptyState = document.getElementById("emptyState");
 const ctx = canvas.getContext("2d");
 const sourceImage = new Image();
 let hasImage = false;
+let localClock = new Date();
+let clockIntervalId = null;
+const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
 
-function formatDateTime(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("es-CO", {
-    dateStyle: "short",
-    timeStyle: "short"
-  }).format(date);
+function pad2(value) {
+  return String(value).padStart(2, "0");
 }
 
-function getWatermarkLines() {
-  const lines = [];
+function formatISODate(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
 
-  if (brandName.value.trim()) lines.push(`Marca: ${brandName.value.trim()}`);
-  if (fullName.value.trim()) lines.push(`Nombre: ${fullName.value.trim()}`);
-  if (docId.value.trim()) lines.push(`ID: ${docId.value.trim()}`);
+function formatTime(date) {
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
+}
 
-  const dateText = formatDateTime(timestamp.value);
-  if (dateText) lines.push(`Fecha: ${dateText}`);
+function formatDotDate(date) {
+  return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
+}
 
-  if (customCode.value.trim()) lines.push(`Codigo: ${customCode.value.trim()}`);
+function formatDay(date) {
+  const dayText = new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(date);
+  return dayText.charAt(0).toUpperCase() + dayText.slice(1);
+}
 
-  if (!lines.length) {
-    lines.push("Marca de agua generada localmente");
+function setInitialDateTimeInputs() {
+  const now = new Date();
+  dateInput.value = formatISODate(now);
+  localTimeInput.value = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+}
+
+function getLocalClockFromInputs() {
+  const now = new Date();
+
+  const [year, month, day] = (dateInput.value || formatISODate(now)).split("-").map(Number);
+  const [hours, minutes] = (localTimeInput.value || `${pad2(now.getHours())}:${pad2(now.getMinutes())}`).split(":").map(Number);
+
+  return new Date(year, month - 1, day, hours, minutes, now.getSeconds(), 0);
+}
+
+function getOverlayValues() {
+  const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
+
+  return {
+    local: formatTime(localClock),
+    gtm: formatTime(gtmClock),
+    day: formatDay(localClock),
+    date: formatDotDate(localClock)
+  };
+}
+
+function restartClock() {
+  localClock = getLocalClockFromInputs();
+
+  if (clockIntervalId) {
+    clearInterval(clockIntervalId);
   }
 
-  return lines;
+  clockIntervalId = setInterval(() => {
+    localClock = new Date(localClock.getTime() + 1000);
+    drawWatermark();
+  }, 1000);
+}
+
+function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.font = `500 ${labelFontSize}px ${canvasFontStack}`;
+  ctx.fillText(label, x, y);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 ${valueFontSize}px ${canvasFontStack}`;
+  ctx.fillText(value, x, y + valueFontSize + 6);
 }
 
 function drawWatermark() {
   if (!hasImage) return;
 
+  const values = getOverlayValues();
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  const lines = getWatermarkLines();
-  const fontSize = Math.max(14, Math.round(canvas.width * 0.02));
-  const lineHeight = fontSize * 1.35;
-  const padding = Math.max(10, Math.round(canvas.width * 0.015));
-
-  ctx.font = `700 ${fontSize}px Outfit, sans-serif`;
-  const textWidths = lines.map((line) => ctx.measureText(line).width);
-  const boxWidth = Math.max(...textWidths) + padding * 2;
-  const boxHeight = lines.length * lineHeight + padding * 2;
-
-  let x = padding;
-  let y = padding;
-
-  switch (position.value) {
-    case "top-right":
-      x = canvas.width - boxWidth - padding;
-      y = padding;
-      break;
-    case "bottom-left":
-      x = padding;
-      y = canvas.height - boxHeight - padding;
-      break;
-    case "bottom-right":
-      x = canvas.width - boxWidth - padding;
-      y = canvas.height - boxHeight - padding;
-      break;
-    case "center":
-      x = (canvas.width - boxWidth) / 2;
-      y = (canvas.height - boxHeight) / 2;
-      break;
-    default:
-      x = padding;
-      y = padding;
-  }
-
-  const alpha = Number(opacity.value) / 100;
+  const margin = Math.max(10, Math.round(canvas.width * 0.02));
+  const boxX = margin;
+  const boxWidth = canvas.width - margin * 2;
+  const boxHeight = Math.max(102, Math.round(canvas.height * 0.2));
+  const boxY = canvas.height - boxHeight - margin;
+  const padding = Math.max(12, Math.round(canvas.width * 0.02));
+  const labelFontSize = Math.max(12, Math.round(canvas.width * 0.018));
+  const valueFontSize = Math.max(20, Math.round(canvas.width * 0.043));
 
   ctx.save();
-  ctx.globalAlpha = Math.max(0.2, Math.min(alpha, 1));
-  ctx.fillStyle = "#101217";
-  ctx.fillRect(x, y, boxWidth, boxHeight);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.4)";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, boxWidth - 1, boxHeight - 1);
+  const leftX = boxX + padding;
+  const rightX = boxX + boxWidth * 0.53;
+  const firstRowY = boxY + padding + labelFontSize;
+  const secondRowY = firstRowY + valueFontSize + labelFontSize + 18;
 
-  ctx.fillStyle = "#f5f7fa";
-  lines.forEach((line, index) => {
-    const textY = y + padding + fontSize + index * lineHeight;
-    ctx.fillText(line, x + padding, textY);
-  });
+  drawOverlayLabelValue("Local", values.local, leftX, firstRowY, labelFontSize, valueFontSize);
+  drawOverlayLabelValue("GTM", values.gtm, leftX, secondRowY, labelFontSize, valueFontSize);
+  drawOverlayLabelValue("Dia", values.day, rightX, firstRowY, labelFontSize, valueFontSize);
+  drawOverlayLabelValue("Fecha", values.date, rightX, secondRowY, labelFontSize, valueFontSize);
+
   ctx.restore();
+}
+
+function showEditorWithSwipe() {
+  startScreen.classList.add("hidden");
+  editorShell.classList.remove("hidden");
+  editorShell.classList.remove("reveal-down");
+  void editorShell.offsetWidth;
+  editorShell.classList.add("reveal-down");
 }
 
 function loadSelectedFile(file) {
@@ -121,10 +141,8 @@ function loadSelectedFile(file) {
     canvas.height = Math.round(sourceImage.height * scale);
 
     hasImage = true;
+    showEditorWithSwipe();
     drawWatermark();
-
-    startScreen.classList.add("hidden");
-    editorShell.classList.remove("hidden");
 
     canvas.style.display = "block";
     emptyState.style.display = "none";
@@ -140,6 +158,9 @@ function requestPhotoSelection() {
   photoInput.click();
 }
 
+setInitialDateTimeInputs();
+restartClock();
+
 startUploadBtn.addEventListener("click", requestPhotoSelection);
 changePhotoBtn.addEventListener("click", requestPhotoSelection);
 
@@ -148,16 +169,14 @@ photoInput.addEventListener("change", (event) => {
   loadSelectedFile(file);
 });
 
-opacity.addEventListener("input", () => {
-  opacityValue.value = `${opacity.value}%`;
-  drawWatermark();
+[dateInput, localTimeInput].forEach((input) => {
+  input.addEventListener("input", () => {
+    restartClock();
+    drawWatermark();
+  });
 });
 
-[brandName, fullName, docId, timestamp, customCode, position].forEach((input) => {
-  input.addEventListener("input", drawWatermark);
-});
-
-applyBtn.addEventListener("click", drawWatermark);
+refreshBtn.addEventListener("click", drawWatermark);
 
 downloadBtn.addEventListener("click", () => {
   if (!hasImage) return;

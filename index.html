@@ -25,40 +25,19 @@
 
     <section class="workspace" aria-label="Editor de imagen">
       <div class="panel controls-panel">
-        <h2>Datos de marca</h2>
+        <h2>Datos de la franja</h2>
 
         <button id="changePhotoBtn" type="button" class="ghost-btn">Cambiar foto</button>
 
-        <label for="brandName" class="input-label">Marca / Empresa</label>
-        <input id="brandName" type="text" placeholder="VIDAFEM LABS" maxlength="40">
+        <label for="dateInput" class="input-label">Fecha</label>
+        <input id="dateInput" type="date">
 
-        <label for="fullName" class="input-label">Nombre completo</label>
-        <input id="fullName" type="text" placeholder="Nombre y apellido" maxlength="60">
-
-        <label for="docId" class="input-label">ID / Documento</label>
-        <input id="docId" type="text" placeholder="CC 123456789" maxlength="40">
-
-        <label for="timestamp" class="input-label">Fecha y hora</label>
-        <input id="timestamp" type="datetime-local">
-
-        <label for="customCode" class="input-label">Código interno</label>
-        <input id="customCode" type="text" placeholder="OT-2026-0413" maxlength="40">
-
-        <label for="position" class="input-label">Posición</label>
-        <select id="position">
-          <option value="bottom-right">Inferior derecha</option>
-          <option value="bottom-left">Inferior izquierda</option>
-          <option value="top-right">Superior derecha</option>
-          <option value="top-left">Superior izquierda</option>
-          <option value="center">Centro</option>
-        </select>
-
-        <label for="opacity" class="input-label">Opacidad</label>
-        <input id="opacity" type="range" min="20" max="100" value="72">
-        <output id="opacityValue" for="opacity">72%</output>
+        <label for="localTimeInput" class="input-label">Hora local (HH:mm)</label>
+        <input id="localTimeInput" type="time" step="60">
+        <p class="hint">Los segundos avanzan automáticamente en tiempo real.</p>
 
         <div class="actions">
-          <button id="applyBtn" type="button">Aplicar marca</button>
+          <button id="refreshBtn" type="button">Actualizar franja</button>
           <button id="downloadBtn" type="button" disabled>Descargar imagen</button>
         </div>
       </div>

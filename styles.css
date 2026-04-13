@@ -37,6 +37,10 @@ body {
   animation: rise 500ms ease-out;
 }
 
+.app-shell.reveal-down {
+  animation: swipeDown 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .hidden {
   display: none;
 }
@@ -138,6 +142,12 @@ h2 {
   font-size: 0.93rem;
 }
 
+.hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 input,
 select,
 button,
@@ -206,6 +216,11 @@ button:hover {
   background: linear-gradient(120deg, #3194ff, var(--brand-2));
 }
 
+#refreshBtn {
+  color: #fff;
+  background: linear-gradient(120deg, #3194ff, var(--brand-2));
+}
+
 #downloadBtn {
   color: #fff;
   background: linear-gradient(120deg, #4dd96d, var(--ok));
@@ -269,6 +284,18 @@ canvas {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes swipeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
   }
 
   to {
