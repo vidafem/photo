@@ -1,4 +1,5 @@
 :root {
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --bg: #f2f2f7;
   --bg-accent: #e8ecf8;
   --panel: rgba(255, 255, 255, 0.9);
@@ -21,7 +22,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Outfit", sans-serif;
+  font-family: var(--font-system);
   color: var(--ink);
   background:
     radial-gradient(circle at 18% 16%, #fefeff 0, transparent 38%),
@@ -99,7 +100,8 @@ h1 {
   margin: 0.4rem 0;
   font-size: clamp(1.6rem, 5vw, 2.9rem);
   line-height: 1.1;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-system);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
