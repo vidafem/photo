@@ -15,6 +15,15 @@ window.addEventListener('DOMContentLoaded', () => {
   const longitudeInput = document.getElementById("longitudeInput");
   const altitudeInput = document.getElementById("altitudeInput");
   const openMapBtn = document.getElementById("openMapBtn");
+  const mapModal = document.getElementById("mapModal");
+  const leafletMapDiv = document.getElementById("leafletMap");
+  const acceptMapBtn = document.getElementById("acceptMapBtn");
+  const closeMapBtn = document.getElementById("closeMapBtn");
+  // --- Utilidad para simular código plus (placeholder) ---
+  function getPlusCode(lat, lng) {
+    // Esto es solo un placeholder, para producción usar una librería de Plus Codes
+    return "R4F4+GQH";
+  }
 
   const ctx = canvas.getContext("2d");
   const sourceImage = new Image();
@@ -202,11 +211,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = labelFont;
     ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, boxY + boxHeight - Math.max(16, Math.round(boxHeight * 0.10)));
     ctx.restore();
-  // --- Utilidad para simular código plus (placeholder) ---
-  function getPlusCode(lat, lng) {
-    // Esto es solo un placeholder, para producción usar una librería de Plus Codes
-    return "R4F4+GQH";
-  }
+
   }
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
