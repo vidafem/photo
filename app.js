@@ -1,3 +1,8 @@
+  // Logo de la app (mapcam.webp)
+  const logoImg = new window.Image();
+  logoImg.src = 'mapcam.webp';
+  let logoLoaded = false;
+  logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
 window.addEventListener('DOMContentLoaded', () => {
   // Elementos del DOM
   const photoInput = document.getElementById("photoInput");
@@ -124,9 +129,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function getOverlayValues() {
     const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
-    // Simulación de código plus y dirección (en el futuro se puede hacer reverse geocoding)
-    const plusCode = geoData.lat && geoData.lng ? getPlusCode(geoData.lat, geoData.lng) : "R4F4+GQH";
-    const direccion = "Guayaquil 090512, Ecuador 1EA1E8";
+    // Dirección y plus code automáticos
     return {
       local: formatTime(localClock),
       gtm: formatTime(gtmClock),
@@ -135,8 +138,8 @@ window.addEventListener('DOMContentLoaded', () => {
       lat: geoData.lat,
       lng: geoData.lng,
       alt: geoData.alt,
-      plusCode,
-      direccion
+      plusCode: geoData.plusCode || "R4F4+GQH",
+      direccion: geoData.direccion || "Guayaquil 090512, Ecuador 🇪🇨"
     };
   }
   function restartClock() {
@@ -171,6 +174,13 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.72)";
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
+    // --- Logo arriba derecha ---
+    if (logoLoaded) {
+      const logoW = Math.max(110, Math.round(boxWidth * 0.16));
+      const logoH = Math.round(logoW * logoImg.height / logoImg.width);
+      ctx.drawImage(logoImg, boxX + boxWidth - logoW - 18, boxY + 12, logoW, logoH);
+    }
+
     // --- Primera línea: Plus code y dirección ---
     const plusFont = `600 ${Math.max(22, Math.round(canvas.width * 0.045))}px ${canvasFontStack}`;
     ctx.font = plusFont;
@@ -184,7 +194,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const valueFont = `600 ${Math.max(18, Math.round(canvas.width * 0.032))}px ${canvasFontStack}`;
     const sectionY = plusY + Math.max(18, Math.round(boxHeight * 0.18));
     const colPad = Math.max(32, Math.round(boxWidth * 0.04));
-    const colWidth = (boxWidth - colPad * 2) / 2;
     // Izquierda
     ctx.textAlign = "left";
     ctx.font = labelFont;
@@ -211,6 +220,40 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = labelFont;
     ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, boxY + boxHeight - Math.max(16, Math.round(boxHeight * 0.10)));
     ctx.restore();
+  // --- Geocodificación inversa y plus code ---
+  async function updateGeoData(lat, lng) {
+    // Plus code
+    try {
+      const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
+      const plusCodeData = await plusCodeResp.json();
+      geoData.plusCode = plusCodeData.global_code || getPlusCode(lat, lng);
+    } catch {
+      geoData.plusCode = getPlusCode(lat, lng);
+    }
+    // Dirección
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+      const data = await resp.json();
+      let ciudad = data.address.city || data.address.town || data.address.village || "";
+      let cp = data.address.postcode || "";
+      let pais = data.address.country || "";
+      let bandera = "";
+      if (data.address.country_code) {
+        // Bandera emoji
+        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
+      }
+      geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
+    } catch {
+      geoData.direccion = "";
+    }
+    drawWatermark();
+  }
+
+  function countryCodeToFlag(cc) {
+    return cc
+      .toUpperCase()
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+  }
 
   }
   function showEditorWithSwipe() {
@@ -227,7 +270,11 @@ window.addEventListener('DOMContentLoaded', () => {
     geoData.lat = Number(latitudeInput.value);
     geoData.lng = Number(longitudeInput.value);
     geoData.alt = Number(altitudeInput.value);
-    drawWatermark();
+    if (geoData.lat && geoData.lng) {
+      updateGeoData(geoData.lat, geoData.lng);
+    } else {
+      drawWatermark();
+    }
   }
   function getLocation() {
     if (!navigator.geolocation) return;
