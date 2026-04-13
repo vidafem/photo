@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoMark Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Edición local y privada</p>
+      <h1>Marca de agua instantánea para tus fotos</h1>
+      <p class="subtitle">Sube una imagen, agrega datos precisos y descarga el resultado. Nada se almacena en servidor.</p>
+    </header>
+
+    <section class="workspace" aria-label="Editor de imagen">
+      <div class="panel controls-panel">
+        <h2>Datos de marca</h2>
+
+        <label for="photoInput" class="input-label">Foto</label>
+        <input id="photoInput" type="file" accept="image/*">
+
+        <label for="brandName" class="input-label">Marca / Empresa</label>
+        <input id="brandName" type="text" placeholder="VIDAFEM LABS" maxlength="40">
+
+        <label for="fullName" class="input-label">Nombre completo</label>
+        <input id="fullName" type="text" placeholder="Nombre y apellido" maxlength="60">
+
+        <label for="docId" class="input-label">ID / Documento</label>
+        <input id="docId" type="text" placeholder="CC 123456789" maxlength="40">
+
+        <label for="timestamp" class="input-label">Fecha y hora</label>
+        <input id="timestamp" type="datetime-local">
+
+        <label for="customCode" class="input-label">Código interno</label>
+        <input id="customCode" type="text" placeholder="OT-2026-0413" maxlength="40">
+
+        <label for="position" class="input-label">Posición</label>
+        <select id="position">
+          <option value="bottom-right">Inferior derecha</option>
+          <option value="bottom-left">Inferior izquierda</option>
+          <option value="top-right">Superior derecha</option>
+          <option value="top-left">Superior izquierda</option>
+          <option value="center">Centro</option>
+        </select>
+
+        <label for="opacity" class="input-label">Opacidad</label>
+        <input id="opacity" type="range" min="20" max="100" value="72">
+        <output id="opacityValue" for="opacity">72%</output>
+
+        <div class="actions">
+          <button id="applyBtn" type="button">Aplicar marca</button>
+          <button id="downloadBtn" type="button" disabled>Descargar imagen</button>
+        </div>
+      </div>
+
+      <div class="panel preview-panel">
+        <h2>Vista previa</h2>
+        <div class="canvas-wrap">
+          <canvas id="previewCanvas" aria-label="Vista previa de imagen con marca de agua"></canvas>
+          <p id="emptyState" class="empty-state">Sube una foto para comenzar.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
