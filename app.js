@@ -1,8 +1,3 @@
-  // Logo de la app (mapcam.webp)
-  const logoImg = new window.Image();
-  logoImg.src = 'mapcam.webp';
-  let logoLoaded = false;
-  logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
 
 window.addEventListener('DOMContentLoaded', () => {
   // --- Declaración de variables y elementos DOM ---
