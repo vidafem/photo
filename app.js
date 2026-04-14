@@ -273,14 +273,15 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = localGmtValueFont;
     ctx.fillText(values.gtm, boxX + colPad + ctx.measureText("GTM ").width + 8, gmtY);
 
-    // Altitude y metros (misma línea, derecha, más grande)
+    // Altitud y metros (misma línea, derecha, más grande)
     ctx.textAlign = "right";
     ctx.font = labelFontBig;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxX + boxWidth - colPad, localY);
-    // Día y fecha (abajo derecha, más grande)
+    // Día y fecha justo debajo de altitud, sin salto adicional
     ctx.font = labelFontBig;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, gmtY + Math.max(32, Math.round(boxHeight * 0.15)));
+    const diaFechaY = localY + Math.max(28, Math.round(boxHeight * 0.13));
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, diaFechaY);
     ctx.restore();
   }
   // --- Geocodificación inversa y plus code ---
