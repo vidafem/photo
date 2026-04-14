@@ -226,27 +226,45 @@ h2 {
   color: var(--muted);
 }
 
-/* --- SOLUCIÓN AL ENCIMAMIENTO --- */
 .input-row {
   display: flex;
-  flex-wrap: wrap; /* Permite bajar los campos si no caben */
+  flex-wrap: wrap; 
   gap: 0.8rem;
   margin-top: 0.7rem;
   align-items: flex-end;
 }
 
-.field-group {
-  flex: 1 1 calc(50% - 0.8rem); /* Ocupa el 50% menos el gap */
-  min-width: 140px; /* Tamaño mínimo para no romperse */
+/* Estilo para fila de opción */
+.option-row {
+  align-items: center;
+  margin: 1rem 0;
+  background: #f8f9ff;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid #eef0f7;
 }
 
-/* Fila de 3 columnas para coordenadas */
+.option-row input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+.option-row label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.field-group {
+  flex: 1 1 calc(50% - 0.8rem); 
+  min-width: 140px; 
+}
+
 .geo-triple .field-group {
   flex: 1 1 calc(33.33% - 0.8rem);
   min-width: 90px;
 }
 
-/* Fila de botones */
 .btn-row {
   display: flex;
   gap: 0.8rem;
@@ -265,7 +283,6 @@ h2 {
   color: #fff !important;
 }
 
-/* Compactación de inputs */
 input,
 select {
   width: 100%;
@@ -312,7 +329,7 @@ button {
 }
 
 .ghost-btn {
-  margin-bottom: 0; /* Ajustado para filas */
+  margin-bottom: 0; 
   color: var(--brand-2);
   background: #f2f8ff;
   border: 1px solid #cfe6ff;
