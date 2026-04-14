@@ -59,7 +59,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
 
   function openMapModal() {
@@ -173,17 +173,14 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
-    // Dirección
+    // Dirección (CORREGIDO: Ahora asegura la actualización de CP)
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
       let ciudad = data.address.city || data.address.town || data.address.village || "";
       let cp = data.address.postcode || "";
       let pais = data.address.country || "";
-      let bandera = "";
-      if (data.address.country_code) {
-        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
-      }
+      let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
       geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
     } catch {
       geoData.direccion = "";
@@ -232,20 +229,16 @@ window.addEventListener('DOMContentLoaded', () => {
     // --- BLOQUE FLOTANTE REFINADO (Negro 50%, Altura REDUCIDA, logo1.png) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
-      // Altura reducida aún más (0.32)
       const floatBoxH = Math.max(50, Math.round(boxHeight * 0.32));
-      // Pegado al borde derecho
       const floatBoxX = boxWidth - floatBoxW; 
       const floatBoxY = boxY - floatBoxH; 
 
-      // Fondo del cuadro negro al 50% y esquinas RECTAS
       ctx.beginPath();
       ctx.rect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
       ctx.closePath();
       ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; 
       ctx.fill();
 
-      // Dibujar logo1.png centrado
       const padding = 6;
       const imgW = floatBoxW - (padding * 2);
       const imgH = Math.round(imgW * logoImg.height / logoImg.width);
@@ -258,14 +251,13 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // --- Configuración de tamaños de fuente proporcionales (-1px según pedido) ---
+    // AJUSTE: Tamaños de fuente ajustados (-1px)
     const fPlusDir = Math.max(21, Math.round(canvas.width * 0.034) - 1);
     const fLatLongLabel = Math.max(20, Math.round(canvas.width * 0.032) - 1);
-    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); // SE MANTIENE ORIGINAL
+    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); 
     const fLocalGmt = Math.max(21, Math.round(canvas.width * 0.034) - 1);
     const fAltDate = Math.max(20, Math.round(canvas.width * 0.032) - 1);
 
-    // --- Primera línea ---
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -277,7 +269,6 @@ window.addEventListener('DOMContentLoaded', () => {
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, (boxX + boxWidth / 2) / 0.96, plusDirY);
 
-    // --- Segunda línea ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     ctx.textAlign = "left";
@@ -290,7 +281,6 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", (boxWidth / 2) / 0.96, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea ---
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, (boxX + colPad) / 0.96, localY);
@@ -298,7 +288,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(`GTM ${values.gtm}`, (boxX + colPad) / 0.96, gmtY);
     
     if (showNoteCheck.checked) {
-        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // SE MANTIENE ORIGINAL PARA NOTA
+        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`;
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.fillText("Nota: Capturada con GPS Map Camera Lite", (boxX + colPad) / 0.96, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
     }
@@ -373,12 +363,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
   latitudeInput?.addEventListener("input", () => {
     geoData.lat = Number(latitudeInput.value);
-    drawWatermark();
+    if (geoData.lat && geoData.lng) updateGeoData(geoData.lat, geoData.lng);
+    else drawWatermark();
   });
 
   longitudeInput?.addEventListener("input", () => {
     geoData.lng = Number(longitudeInput.value);
-    drawWatermark();
+    if (geoData.lat && geoData.lng) updateGeoData(geoData.lat, geoData.lng);
+    else drawWatermark();
   });
 
   altitudeInput?.addEventListener("input", () => {
