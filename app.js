@@ -26,8 +26,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE ACTUALIZADA: Redondeada y delgada (priorizando Quicksand-Light)
-  const canvasFontStack = '"Quicksand-Light", "Quicksand", "Arial Rounded MT Bold", sans-serif';
+  // FUENTE ACTUALIZADA: Delgada, geométrica (M recortada, A redonda, C abierta)
+  const canvasFontStack = '"Montserrat Light", "League Spartan", "Century Gothic", sans-serif';
   let geoData = {
     lat: null,
     lng: null,
@@ -107,7 +107,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
+  // Utilidades y lógica de la app
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -206,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro con bordes redondeados
+    // Fondo negro con bordes redondeados (60% opacidad)
     ctx.beginPath();
     const radius = 22;
     ctx.moveTo(boxX + radius, boxY);
@@ -222,56 +222,48 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- REFINAMIENTO: Bloque de marca flotante (Tipografía delgada y sin negrita, opacidad 70%) ---
+    // --- Bloque de marca flotante (DERECHA, Opacidad 70%, Fuentes Light) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
-      // Margen derecho aumentado a 16px para evitar recorte
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
-      // Fondo del cuadro (Misma opacidad que el grande: 60%)
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
       ctx.fillStyle = "rgba(35, 35, 35, 0.7)";
       ctx.fill();
 
-      // --- Estructura interna (Grosor de fuente light/300) ---
       const paddingX = 14; 
       const lSize = floatBoxH * 0.35; 
       const fGPSSize = Math.max(16, Math.round(floatBoxH * 0.28));
       const fLiteSize = Math.max(15, Math.round(floatBoxH * 0.28));
 
-      // 1. Logo (Con espacio lateral)
       const contentStartX = floatBoxX + paddingX;
       const firstLineY = floatBoxY + floatBoxH * 0.38;
+      
+      // Logo a la izquierda de GPS Map con espacio
       ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
-      // 2. Texto "GPS Map" (A la derecha del logo con 2 espacios, grosor 300)
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
       ctx.font = `300 ${fGPSSize}px ${canvasFontStack}`;
-      // Añadimos espacios visuales separando el inicio del texto del logo
-      ctx.fillText("GPS Map", contentStartX + lSize + 14, firstLineY);
+      ctx.fillText("GPS Map", contentStartX + lSize + 16, firstLineY);
 
-      // 3. Cuadro blanco "Camera Lite" 
+      // Camera Lite (Cuadro blanco 70%, Texto negro 60%, Bordes redondeados)
       const liteText = "Camera Lite";
-      // Grosor 400 para Camera Lite (delgado, no bold)
       ctx.font = `400 ${fLiteSize}px ${canvasFontStack}`;
       const liteTextW = ctx.measureText(liteText).width;
-      
       const boxLiteW = liteTextW + 16; 
       const boxLiteH = fLiteSize + 8;
       const boxLiteX = contentStartX;
       const boxLiteY = floatBoxY + floatBoxH * 0.58;
 
-      // Cuadro blanco (70% opacidad y bordes redondeados)
       ctx.beginPath();
       ctx.roundRect(boxLiteX, boxLiteY, boxLiteW, boxLiteH, 5); 
       ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
       ctx.fill();
 
-      // Texto negro (60% opacidad)
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
       ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
     }
@@ -283,51 +275,38 @@ window.addEventListener('DOMContentLoaded', () => {
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea: Plus code y dirección (Centro, grosor 300) ---
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     const plusDirY = boxY + Math.max(38, Math.round(boxHeight * 0.20));
-    let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
-    ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
+    ctx.fillText(`${values.plusCode}, ${values.direccion}`, boxWidth / 2, plusDirY);
 
-    // --- Segunda línea: Latitude y Longitude (más grandes, grosor 300) ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    // Latitud
+    
     ctx.textAlign = "left";
     ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Latitud", boxX + colPad, sectionY);
+    ctx.fillText("Latitud", colPad, sectionY);
     ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
-    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-    // Longitud
-    ctx.textAlign = "left";
-    ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
+
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
-    ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea: Local/GTM y Altitud/Fecha (grosor 300) ---
-    ctx.textAlign = "left";
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
-    // Local y su hora
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
-    ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
-    const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
-    ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
+    ctx.fillText(`Local ${values.local}`, colPad, localY);
+    ctx.fillText(`GTM ${values.gtm}`, colPad, localY + Math.max(28, Math.round(boxHeight * 0.13)));
 
-    // Altitud y Día/Fecha (Izquierda desde el centro)
     ctx.font = `300 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, localY + Math.max(28, Math.round(boxHeight * 0.13)));
     
     ctx.restore();
   }
-  // --- Geocodificación inversa y plus code ---
+  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN TU ORIGINAL) ---
   async function updateGeoData(lat, lng) {
-    // Plus code
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
@@ -335,24 +314,19 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
-    // Dirección
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
       let ciudad = data.address.city || data.address.town || data.address.village || "";
       let cp = data.address.postcode || "";
       let pais = data.address.country || "";
-      let bandera = "";
-      if (data.address.country_code) {
-        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
-      }
+      let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
       geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
     } catch {
       geoData.direccion = "";
     }
     drawWatermark();
   }
-
 
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
