@@ -37,56 +37,70 @@ window.addEventListener('DOMContentLoaded', () => {
     direccion: ""
   };
 
+  // --- LOGO ---
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
-  logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
+  logoImg.onload = () => { 
+    logoLoaded = true; 
+    drawWatermark(); 
+  };
 
+  // --- Leaflet ---
   let leafletMap = null;
   let leafletMarker = null;
   let tempLatLng = null;
 
-  function getPlusCode(lat, lng) {
+  // --- Utilidades ---
+  function getPlusCode() {
     return geoData.plusCode || "";
   }
 
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
 
   function openMapModal() {
     mapModal.classList.remove("hidden");
+
     setTimeout(() => {
       if (!leafletMap) {
         leafletMap = L.map("leafletMap").setView([
-          geoData.lat || 4.65,
-          geoData.lng || -74.1
+          geoData.lat || -2.17,
+          geoData.lng || -79.92
         ], 15);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; OpenStreetMap'
         }).addTo(leafletMap);
+
         leafletMarker = L.marker([
-          geoData.lat || 4.65,
-          geoData.lng || -74.1
+          geoData.lat || -2.17,
+          geoData.lng || -79.92
         ], { draggable: true }).addTo(leafletMap);
-        leafletMarker.on('dragend', (e) => {
+
+        leafletMarker.on('dragend', () => {
           tempLatLng = leafletMarker.getLatLng();
         });
+
         leafletMap.on('click', (e) => {
           leafletMarker.setLatLng(e.latlng);
           tempLatLng = e.latlng;
         });
+
       } else {
         leafletMap.setView([
-          geoData.lat || 4.65,
-          geoData.lng || -74.1
+          geoData.lat || -2.17,
+          geoData.lng || -79.92
         ], 15);
+
         leafletMarker.setLatLng([
-          geoData.lat || 4.65,
-          geoData.lng || -74.1
+          geoData.lat || -2.17,
+          geoData.lng || -79.92
         ]);
+
         tempLatLng = leafletMarker.getLatLng();
         leafletMap.invalidateSize();
       }
@@ -99,6 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   openMapBtn?.addEventListener("click", openMapModal);
   closeMapBtn?.addEventListener("click", closeMapModal);
+
   acceptMapBtn?.addEventListener("click", () => {
     if (leafletMarker) {
       const pos = tempLatLng || leafletMarker.getLatLng();
@@ -107,6 +122,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
+  // --- Formatos ---
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -136,13 +152,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function getLocalClockFromInputs() {
     const now = new Date();
+
     const [year, month, day] = (dateInput.value || formatISODate(now)).split("-").map(Number);
     const [hours, minutes] = (localTimeInput.value || `${pad2(now.getHours())}:${pad2(now.getMinutes())}`).split(":").map(Number);
+
     return new Date(year, month - 1, day, hours, minutes, now.getSeconds(), 0);
   }
 
   function getOverlayValues() {
     const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
+
     return {
       local: formatTime(localClock),
       gtm: formatTime(gtmClock),
@@ -156,50 +175,67 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ✅ ÚNICA FUNCIÓN CORREGIDA
+  // --- FUNCIÓN CORREGIDA (ÚNICA) ---
   async function updateGeoData(lat, lng) {
-    if (lat == null || lng == null) return;
+    if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
 
     geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     drawWatermark();
 
+    // Dirección
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
       .then(r => r.json())
       .then(data => {
         let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
         let cp = data.address.postcode || "";
         let pais = data.address.country || "";
-        let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
+        let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code) : "";
+
         geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
         drawWatermark();
-      }).catch(() => {});
+      })
+      .catch(() => {});
 
+    // Plus Code
     fetch(`https://plus.codes/api?address=${lat},${lng}`)
       .then(r => r.json())
       .then(pcData => {
         geoData.plusCode = pcData.global_code || "";
         drawWatermark();
-      }).catch(() => {
+      })
+      .catch(() => {
         geoData.plusCode = "";
         drawWatermark();
       });
   }
-
-  function restartClock() {
+    function restartClock() {
     localClock = getLocalClockFromInputs();
+
     if (clockIntervalId) {
       clearInterval(clockIntervalId);
     }
+
     clockIntervalId = setInterval(() => {
       localClock = new Date(localClock.getTime() + 1000);
       drawWatermark();
     }, 1000);
   }
 
-  // 🔥 TODO TU drawWatermark ORIGINAL SIGUE IGUAL (NO SE TOCÓ)
+  function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = `300 ${labelFontSize}px ${canvasFontStack}`;
+    ctx.fillText(label, x, y);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `300 ${valueFontSize}px ${canvasFontStack}`;
+    ctx.fillText(value, x, y + valueFontSize + 6);
+  }
+
   function drawWatermark() {
     if (!hasImage) return;
+
     const values = getOverlayValues();
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
@@ -207,21 +243,134 @@ window.addEventListener('DOMContentLoaded', () => {
     const boxWidth = canvas.width;
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
+
     ctx.save();
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
-    let dirLine = values.plusCode ? `${values.plusCode}, ${values.direccion}` : values.direccion;
+    // --- LOGO ---
+    if (logoLoaded) {
+      const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
+      const floatBoxH = Math.max(50, Math.round(boxHeight * 0.32));
+      const floatBoxX = boxWidth - floatBoxW;
+      const floatBoxY = boxY - floatBoxH;
 
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
+
+      const padding = 6;
+      const imgW = floatBoxW - (padding * 2);
+      const imgH = Math.round(imgW * logoImg.height / logoImg.width);
+
+      let finalW = imgW;
+      let finalH = imgH;
+
+      if (finalH > floatBoxH - (padding * 2)) {
+        finalH = floatBoxH - (padding * 2);
+        finalW = Math.round(finalH * logoImg.width / logoImg.height);
+      }
+
+      ctx.drawImage(
+        logoImg,
+        floatBoxX + (floatBoxW - finalW) / 2,
+        floatBoxY + (floatBoxH - finalH) / 2,
+        finalW,
+        finalH
+      );
+    }
+
+    // --- FUENTES DINÁMICAS ---
+    const fPlusDir = Math.max(21, Math.round(canvas.width * 0.034) - 1);
+    const fLatLongLabel = Math.max(20, Math.round(canvas.width * 0.032) - 1);
+    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
+    const fLocalGmt = Math.max(21, Math.round(canvas.width * 0.034) - 1);
+    const fAltDate = Math.max(20, Math.round(canvas.width * 0.032) - 1);
+
+    ctx.textAlign = "center";
+    ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
-    ctx.font = "20px Verdana";
-    ctx.fillText(dirLine, 20, boxY + 30);
+
+    // --- ESCALA HORIZONTAL ---
+    ctx.setTransform(0.96, 0, 0, 1, 0, 0);
+
+    // --- DIRECCIÓN + PLUS CODE ---
+    const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
+    let dirLine = values.plusCode
+      ? `${values.plusCode}, ${values.direccion}`
+      : values.direccion;
+
+    ctx.fillText(dirLine, (boxX + boxWidth / 2) / 0.96, plusDirY);
+
+    // --- LAT / LNG ---
+    const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
+    const colPad = Math.max(38, Math.round(boxWidth * 0.045));
+
+    ctx.textAlign = "left";
+
+    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillText("Latitud", (boxX + colPad) / 0.96, sectionY);
+
+    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.fillText(
+      values.lat !== null ? values.lat.toFixed(6) + "°" : "-",
+      (boxX + colPad) / 0.96,
+      sectionY + Math.max(32, Math.round(boxHeight * 0.15))
+    );
+
+    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillText("Longitud", (boxWidth / 2) / 0.96, sectionY);
+
+    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.fillText(
+      values.lng !== null ? values.lng.toFixed(6) + "°" : "-",
+      (boxWidth / 2) / 0.96,
+      sectionY + Math.max(32, Math.round(boxHeight * 0.15))
+    );
+
+    // --- HORAS ---
+    const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
+
+    ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
+    ctx.fillText(`Local ${values.local}`, (boxX + colPad) / 0.96, localY);
+
+    const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
+    ctx.fillText(`GTM ${values.gtm}`, (boxX + colPad) / 0.96, gmtY);
+
+    // --- NOTA OPCIONAL ---
+    if (showNoteCheck && showNoteCheck.checked) {
+      ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+
+      ctx.fillText(
+        "Nota: Capturada con GPS Map Camera Lite",
+        (boxX + colPad) / 0.96,
+        gmtY + Math.max(22, Math.round(boxHeight * 0.12))
+      );
+    }
+
+    // --- ALTITUD + FECHA ---
+    ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
+
+    const altText =
+      (values.alt !== null && !isNaN(values.alt))
+        ? `Altitud ${values.alt.toFixed(0)} metros`
+        : "Altitud -";
+
+    ctx.fillText(altText, (boxWidth / 2) / 0.96, localY);
+    ctx.fillText(
+      values.day + ", " + values.date,
+      (boxWidth / 2) / 0.96,
+      gmtY
+    );
+
+    // --- RESTAURAR ESCALA ---
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     ctx.restore();
   }
-
-  function showEditorWithSwipe() {
+    function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
     editorShell.classList.remove("hidden");
     editorShell.classList.remove("reveal-down");
@@ -233,11 +382,12 @@ window.addEventListener('DOMContentLoaded', () => {
     latitudeInput.value = lat?.toFixed(7) || "";
     longitudeInput.value = lng?.toFixed(7) || "";
     altitudeInput.value = alt !== undefined && alt !== null ? Number(alt).toFixed(1) : "";
-    geoData.lat = Number(latitudeInput.value);
-    geoData.lng = Number(longitudeInput.value);
-    geoData.alt = Number(altitudeInput.value);
 
-    if (geoData.lat != null && geoData.lng != null) {
+    geoData.lat = latitudeInput.value ? Number(latitudeInput.value) : null;
+    geoData.lng = longitudeInput.value ? Number(longitudeInput.value) : null;
+    geoData.alt = altitudeInput.value ? Number(altitudeInput.value) : null;
+
+    if (geoData.lat !== null && geoData.lng !== null) {
       updateGeoData(geoData.lat, geoData.lng);
     } else {
       drawWatermark();
@@ -246,9 +396,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function getLocation() {
     if (!navigator.geolocation) return;
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setGeoInputs(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+        setGeoInputs(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          pos.coords.altitude
+        );
       },
       () => {
         setGeoInputs(null, null, null);
@@ -258,19 +413,25 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   latitudeInput?.addEventListener("input", () => {
-    geoData.lat = Number(latitudeInput.value);
-    if (geoData.lat != null && geoData.lng != null) updateGeoData(geoData.lat, geoData.lng);
-    else drawWatermark();
+    geoData.lat = latitudeInput.value ? Number(latitudeInput.value) : null;
+    if (geoData.lat !== null && geoData.lng !== null) {
+      updateGeoData(geoData.lat, geoData.lng);
+    } else {
+      drawWatermark();
+    }
   });
 
   longitudeInput?.addEventListener("input", () => {
-    geoData.lng = Number(longitudeInput.value);
-    if (geoData.lat != null && geoData.lng != null) updateGeoData(geoData.lat, geoData.lng);
-    else drawWatermark();
+    geoData.lng = longitudeInput.value ? Number(longitudeInput.value) : null;
+    if (geoData.lat !== null && geoData.lng !== null) {
+      updateGeoData(geoData.lat, geoData.lng);
+    } else {
+      drawWatermark();
+    }
   });
 
   altitudeInput?.addEventListener("input", () => {
-    geoData.alt = Number(altitudeInput.value);
+    geoData.alt = altitudeInput.value ? Number(altitudeInput.value) : null;
     drawWatermark();
   });
 
@@ -278,21 +439,28 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function loadSelectedFile(file) {
     if (!file) return;
+
     const objectUrl = URL.createObjectURL(file);
+
     sourceImage.onload = () => {
       const maxWidth = 2000;
       const scale = sourceImage.width > maxWidth ? maxWidth / sourceImage.width : 1;
+
       canvas.width = Math.round(sourceImage.width * scale);
       canvas.height = Math.round(sourceImage.height * scale);
+
       hasImage = true;
       showEditorWithSwipe();
       drawWatermark();
+
       canvas.style.display = "block";
       emptyState.style.display = "none";
       downloadBtn.disabled = false;
+
       URL.revokeObjectURL(objectUrl);
       getLocation();
     };
+
     sourceImage.src = objectUrl;
   }
 
@@ -300,9 +468,17 @@ window.addEventListener('DOMContentLoaded', () => {
     photoInput.click();
   }
 
+  // --- INIT ---
   setInitialDateTimeInputs();
   restartClock();
 
+  if (latitudeInput && longitudeInput && altitudeInput) {
+    geoData.lat = latitudeInput.value ? Number(latitudeInput.value) : null;
+    geoData.lng = longitudeInput.value ? Number(longitudeInput.value) : null;
+    geoData.alt = altitudeInput.value ? Number(altitudeInput.value) : null;
+  }
+
+  // --- EVENTOS ---
   startUploadBtn.addEventListener("click", requestPhotoSelection);
   changePhotoBtn.addEventListener("click", requestPhotoSelection);
 
@@ -322,10 +498,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   downloadBtn.addEventListener("click", () => {
     if (!hasImage) return;
+
     const link = document.createElement("a");
-    const filename = `foto-marca-${Date.now()}.png`;
-    link.download = filename;
+    link.download = `foto-marca-${Date.now()}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
+
 });
