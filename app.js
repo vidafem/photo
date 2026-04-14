@@ -258,25 +258,29 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = valueFont;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
 
-    // --- Tercera línea: Local/GMT y Altitude/Fecha ---
-    // Local y GMT (misma línea, izquierda)
+    // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
     ctx.font = labelFont;
-    const localGmtY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
-    const localText = `Local ${values.local}`;
-    const gmtText = `GTM ${values.gtm}`;
-    ctx.fillText(localText, boxX + colPad, localGmtY);
-    const localWidth = ctx.measureText(localText).width;
-    ctx.fillText(gmtText, boxX + colPad + localWidth + 32, localGmtY);
+    const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
+    // Local y su hora
+    ctx.fillText("Local", boxX + colPad, localY);
+    ctx.font = valueFont;
+    ctx.fillText(values.local, boxX + colPad + ctx.measureText("Local ").width + 8, localY);
+    // GMT y su hora debajo
+    ctx.font = labelFont;
+    const gmtY = localY + Math.max(22, Math.round(boxHeight * 0.09));
+    ctx.fillText("GTM", boxX + colPad, gmtY);
+    ctx.font = valueFont;
+    ctx.fillText(values.gtm, boxX + colPad + ctx.measureText("GTM ").width + 8, gmtY);
 
     // Altitude y metros (misma línea, derecha)
     ctx.textAlign = "right";
     ctx.font = labelFont;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
-    ctx.fillText(altText, boxX + boxWidth - colPad, localGmtY);
+    ctx.fillText(altText, boxX + boxWidth - colPad, localY);
     // Día y fecha (abajo derecha)
     ctx.font = labelFont;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, localGmtY + Math.max(38, Math.round(boxHeight * 0.16)));
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, gmtY + Math.max(28, Math.round(boxHeight * 0.13)));
     ctx.restore();
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
