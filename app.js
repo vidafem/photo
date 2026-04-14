@@ -238,10 +238,10 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // AJUSTE: Se resta 1px a etiquetas y textos (excepto valores Lat/Lng y Nota)
+    // AJUSTE: Tamaños de fuente ajustados (-1px)
     const fPlusDir = Math.max(21, Math.round(canvas.width * 0.034) - 1);
     const fLatLongLabel = Math.max(20, Math.round(canvas.width * 0.032) - 1);
-    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); // Se mantiene original
+    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); 
     const fLocalGmt = Math.max(21, Math.round(canvas.width * 0.034) - 1);
     const fAltDate = Math.max(20, Math.round(canvas.width * 0.032) - 1);
 
@@ -249,43 +249,47 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     
+    // COMPACTACIÓN: Aplicar ligera escala horizontal (0.96)
+    ctx.setTransform(0.96, 0, 0, 1, 0, 0); 
+    
     const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
-    ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
+    ctx.fillText(direccionCompleta, (boxX + boxWidth / 2) / 0.96, plusDirY);
 
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
-    ctx.fillText("Latitud", boxX + colPad, sectionY);
+    ctx.fillText("Latitud", (boxX + colPad) / 0.96, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
-    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
+    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", (boxX + colPad) / 0.96, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
-    ctx.fillText("Longitud", boxWidth / 2, sectionY);
+    ctx.fillText("Longitud", (boxWidth / 2) / 0.96, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
-    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
+    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", (boxWidth / 2) / 0.96, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
-    ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
+    ctx.fillText(`Local ${values.local}`, (boxX + colPad) / 0.96, localY);
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
-    ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
+    ctx.fillText(`GTM ${values.gtm}`, (boxX + colPad) / 0.96, gmtY);
     
     if (showNoteCheck.checked) {
-        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // Se mantiene original
+        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`;
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.fillText("Nota: Capturada con GPS Map Camera Lite", boxX + colPad, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
+        ctx.fillText("Nota: Capturada con GPS Map Camera Lite", (boxX + colPad) / 0.96, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
     }
 
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
-    ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
+    ctx.fillText(altText, (boxWidth / 2) / 0.96, localY);
+    ctx.fillText(values.day + ", " + values.date, (boxWidth / 2) / 0.96, gmtY);
+    
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Restaurar escala
     ctx.restore();
   }
 
-  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
   async function updateGeoData(lat, lng) {
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
