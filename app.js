@@ -219,7 +219,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.lineTo(boxX, boxY + radius);
     ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
     ctx.closePath();
-    ctx.fillStyle = "rgba(0,0,0,0.72)";
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
     // --- Logo arriba derecha ---
