@@ -223,14 +223,12 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fill();
 
     // --- Logo arriba derecha ---
-      const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
-      const logoW = Math.max(60, Math.round(boxWidth * 0.09));
-      const logoH = Math.round(logoW * logoImg.height / logoImg.width);
-      ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
-    }
+    const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    const logoW = Math.max(60, Math.round(boxWidth * 0.09));
+    const logoH = Math.round(logoW * logoImg.height / logoImg.width);
+    ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
 
     // --- Primera línea: Plus code y dirección (misma línea, centrado, mismo tamaño, separado por coma) ---
-    const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     ctx.textAlign = "center";
     ctx.font = plusDirFont;
     ctx.fillStyle = "#fff";
@@ -284,6 +282,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = labelFontBig;
     ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, gmtY + Math.max(32, Math.round(boxHeight * 0.15)));
     ctx.restore();
+  }
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
     // Plus code
