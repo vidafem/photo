@@ -49,6 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function getPlusCode(lat, lng) {
     // Placeholder, para producción usar librería oficial
     return "R4F4+GQH";
+  }
   // (llave eliminada)
   function countryCodeToFlag(cc) {
     return cc
