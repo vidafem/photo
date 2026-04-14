@@ -26,10 +26,10 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE ORIGINAL DEL SISTEMA PARA LA FRANJA
+  // FUENTE ORIGINAL PARA LA FRANJA
   const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
-  // FUENTE GEOMÉTRICA ESPECÍFICA PARA EL LOGO (M profunda, A redonda, C abierta)
-  const logoFontStack = '"Futura", "Century Gothic", "Montserrat", "Apple Gothic", sans-serif';
+  // FUENTE ESPECÍFICA PARA EL LOGO: Oktah Round (con alternativas geométricas similares)
+  const logoFontStack = '"Oktah Round", "OktahRound-Light", "Montserrat", "Century Gothic", sans-serif';
 
   let geoData = {
     lat: null,
@@ -110,7 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
+  // Utilidades y lógica de la app
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -225,7 +225,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- Bloque de marca flotante (DERECHA, Opacidad 70%) ---
+    // --- Bloque de marca flotante (Oktah Round, Opacidad 70%) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
@@ -234,7 +234,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
-      ctx.fillStyle = "rgba(35, 35, 35, 0.7)"; // Opacidad 70%
+      ctx.fillStyle = "rgba(35, 35, 35, 0.7)"; 
       ctx.fill();
 
       const paddingX = 14; 
@@ -245,12 +245,12 @@ window.addEventListener('DOMContentLoaded', () => {
       const contentStartX = floatBoxX + paddingX;
       const firstLineY = floatBoxY + floatBoxH * 0.38;
       
-      // Logo a la izquierda de GPS Map con espacio lateral
+      // Logo (A la izquierda de GPS Map)
       ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
-      // FUENTE ESPECÍFICA PARA GPS MAP (Delgada y Geométrica)
+      // GPS Map con Oktah Round (Peso 300 para ser fina)
       ctx.font = `300 ${fGPSSize}px ${logoFontStack}`;
       ctx.fillText("GPS Map", contentStartX + lSize + 16, firstLineY);
 
@@ -272,14 +272,13 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
     }
 
-    // --- Configuración de tamaños de fuente proporcionales PARA LA FRANJA ---
+    // --- Configuración de la Franja Principal (Fuente del Sistema) ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // RESTAURACIÓN DE FUENTE ORIGINAL PARA EL TEXTO DE LA FRANJA
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -314,8 +313,9 @@ window.addEventListener('DOMContentLoaded', () => {
     
     ctx.restore();
   }
-  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN TU ORIGINAL) ---
+  // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
+    // Plus code
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
@@ -323,19 +323,24 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
+    // Dirección
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
       let ciudad = data.address.city || data.address.town || data.address.village || "";
       let cp = data.address.postcode || "";
       let pais = data.address.country || "";
-      let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
+      let bandera = "";
+      if (data.address.country_code) {
+        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
+      }
       geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
     } catch {
       geoData.direccion = "";
     }
     drawWatermark();
   }
+
 
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
