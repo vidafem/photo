@@ -227,14 +227,15 @@ window.addEventListener('DOMContentLoaded', () => {
     const logoH = Math.round(logoW * logoImg.height / logoImg.width);
     ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
 
-    // --- Configuración de tamaños de fuente proporcionales ---
+    // --- Configuración de tamaños de fuente corregidos ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
-    const fAltDate = Math.max(22, Math.round(canvas.width * 0.048));
+    // Ajustado para que coincida con el peso visual de Lat/Long Value
+    const fAltDate = Math.max(26, Math.round(canvas.width * 0.040));
 
-    // --- Primera línea: Plus code y dirección (misma línea, centrado) ---
+    // --- Primera línea: Plus code y dirección (Centro) ---
     ctx.textAlign = "center";
     ctx.font = `400 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -249,7 +250,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Latitud (Izquierda)
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
-    ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
@@ -280,7 +280,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN TU ORIGINAL) ---
+  // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
     // Plus code
     try {
