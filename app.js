@@ -224,23 +224,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Logo arriba derecha ---
     if (logoLoaded) {
-      const logoW = Math.max(90, Math.round(boxWidth * 0.13));
+      const logoW = Math.max(60, Math.round(boxWidth * 0.09));
       const logoH = Math.round(logoW * logoImg.height / logoImg.width);
-      ctx.drawImage(logoImg, boxX + boxWidth - logoW - 18, boxY + 18, logoW, logoH);
+      ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
     }
 
-    // --- Primera línea: Plus code y dirección ---
-    const plusFont = `700 ${Math.max(26, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
+    // --- Primera línea: Plus code (pequeño, centrado) ---
+    const plusFont = `600 ${Math.max(16, Math.round(canvas.width * 0.028))}px ${canvasFontStack}`;
     ctx.font = plusFont;
     ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
-    const plusY = boxY + Math.max(38, Math.round(boxHeight * 0.23));
-    ctx.fillText(`${values.plusCode}, ${values.direccion}`, boxX + boxWidth / 2, plusY);
+    const plusY = boxY + Math.max(26, Math.round(boxHeight * 0.16));
+    ctx.fillText(values.plusCode, boxX + boxWidth / 2, plusY);
 
-    // --- Segunda línea: Latitude y Longitude ---
-    const labelFont = `500 ${Math.max(15, Math.round(canvas.width * 0.025))}px ${canvasFontStack}`;
-    const valueFont = `700 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
-    const sectionY = plusY + Math.max(18, Math.round(boxHeight * 0.18));
+    // --- Segunda línea: Dirección (grande, centrado) ---
+    const dirFont = `700 ${Math.max(22, Math.round(canvas.width * 0.042))}px ${canvasFontStack}`;
+    ctx.font = dirFont;
+    const dirY = plusY + Math.max(28, Math.round(boxHeight * 0.19));
+    ctx.fillText(values.direccion, boxX + boxWidth / 2, dirY);
+
+    // --- Tercera línea: Latitude y Longitude (grandes, alineados) ---
+    const labelFont = `500 ${Math.max(14, Math.round(canvas.width * 0.022))}px ${canvasFontStack}`;
+    const valueFont = `700 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    const sectionY = dirY + Math.max(24, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     // Latitude
     ctx.textAlign = "left";
@@ -248,33 +254,33 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "#fff";
     ctx.fillText("Latitude", boxX + colPad, sectionY);
     ctx.font = valueFont;
-    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(28, Math.round(boxHeight * 0.17)));
+    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
     // Longitude
     ctx.textAlign = "right";
     ctx.font = labelFont;
     ctx.fillText("Longitude", boxX + boxWidth - colPad, sectionY);
     ctx.font = valueFont;
-    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(28, Math.round(boxHeight * 0.17)));
+    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
 
-    // --- Tercera línea: Local/GMT y Altitude/Fecha ---
+    // --- Cuarta línea: Local/GMT y Altitude/Fecha ---
     // Local y GMT (izquierda, uno debajo del otro)
     ctx.textAlign = "left";
     ctx.font = labelFont;
-    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(62, Math.round(boxHeight * 0.38)));
+    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(56, Math.round(boxHeight * 0.32)));
     ctx.font = valueFont;
-    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(84, Math.round(boxHeight * 0.54)));
+    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(76, Math.round(boxHeight * 0.41)));
     ctx.font = labelFont;
-    ctx.fillText("GMT", boxX + colPad, sectionY + Math.max(110, Math.round(boxHeight * 0.68)));
+    ctx.fillText("GTM", boxX + colPad, sectionY + Math.max(102, Math.round(boxHeight * 0.54)));
     ctx.font = valueFont;
-    ctx.fillText(values.gtm, boxX + colPad, sectionY + Math.max(132, Math.round(boxHeight * 0.78)));
+    ctx.fillText(values.gtm, boxX + colPad, sectionY + Math.max(122, Math.round(boxHeight * 0.62)));
     // Altitude y fecha (derecha, uno debajo del otro)
     ctx.textAlign = "right";
     ctx.font = labelFont;
-    ctx.fillText("Altitude", boxX + boxWidth - colPad, sectionY + Math.max(62, Math.round(boxHeight * 0.38)));
+    ctx.fillText("Altitude", boxX + boxWidth - colPad, sectionY + Math.max(56, Math.round(boxHeight * 0.32)));
     ctx.font = valueFont;
-    ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, sectionY + Math.max(84, Math.round(boxHeight * 0.54)));
+    ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, sectionY + Math.max(76, Math.round(boxHeight * 0.41)));
     ctx.font = labelFont;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, sectionY + Math.max(132, Math.round(boxHeight * 0.78)));
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, sectionY + Math.max(122, Math.round(boxHeight * 0.62)));
     ctx.restore();
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
