@@ -28,6 +28,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let clockIntervalId = null;
   // FUENTE VERDANA PARA LA FRANJA DE DATOS
   const canvasFontStack = 'Verdana, Geneva, sans-serif';
+
   let geoData = {
     lat: null,
     lng: null,
@@ -35,11 +36,13 @@ window.addEventListener('DOMContentLoaded', () => {
     plusCode: null,
     direccion: null
   };
-  // Logo
+
+  // NUEVO LOGO COMPLETO (Sustituye a mapcam.webp)
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
   logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
+
   // Leaflet
   let leafletMap = null;
   let leafletMarker = null;
@@ -50,12 +53,14 @@ window.addEventListener('DOMContentLoaded', () => {
     // Placeholder, para producción usar librería oficial
     return "R4F4+GQH";
   }
+
   // (llave eliminada)
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
   }
+
   function openMapModal() {
     mapModal.classList.remove("hidden");
     setTimeout(() => {
@@ -111,30 +116,37 @@ window.addEventListener('DOMContentLoaded', () => {
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
+
   function formatISODate(date) {
     return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
   }
+
   function formatTime(date) {
     return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
   }
+
   function formatDotDate(date) {
     return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
   }
+
   function formatDay(date) {
     const dayText = new Intl.DateTimeFormat("es-ES", { weekday: "long" }).format(date);
     return dayText.charAt(0).toUpperCase() + dayText.slice(1);
   }
+
   function setInitialDateTimeInputs() {
     const now = new Date();
     dateInput.value = formatISODate(now);
     localTimeInput.value = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
   }
+
   function getLocalClockFromInputs() {
     const now = new Date();
     const [year, month, day] = (dateInput.value || formatISODate(now)).split("-").map(Number);
     const [hours, minutes] = (localTimeInput.value || `${pad2(now.getHours())}:${pad2(now.getMinutes())}`).split(":").map(Number);
     return new Date(year, month - 1, day, hours, minutes, now.getSeconds(), 0);
   }
+
   function getOverlayValues() {
     const gtmClock = new Date(localClock.getTime() + 5 * 60 * 60 * 1000);
     return {
@@ -177,6 +189,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     drawWatermark();
   }
+
   function restartClock() {
     localClock = getLocalClockFromInputs();
     if (clockIntervalId) {
@@ -187,6 +200,7 @@ window.addEventListener('DOMContentLoaded', () => {
       drawWatermark();
     }, 1000);
   }
+
   function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
     ctx.font = `300 ${labelFontSize}px ${canvasFontStack}`;
@@ -195,6 +209,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `300 ${valueFontSize}px ${canvasFontStack}`;
     ctx.fillText(value, x, y + valueFontSize + 6);
   }
+
   function drawWatermark() {
     if (!hasImage) return;
     const values = getOverlayValues();
@@ -222,7 +237,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- BLOQUE FLOTANTE (Negro 60%, Altura reducida, logo1.png) ---
+    // --- BLOQUE FLOTANTE REFINADO (Negro 60%, Altura reducida, logo1.png) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(60, Math.round(boxHeight * 0.40)); // Altura reducida
@@ -265,13 +280,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     ctx.textAlign = "left";
-    ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Latitud", boxX + colPad, sectionY);
-    ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-    ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
-    ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
     // --- Tercera línea ---
@@ -280,12 +295,13 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
-    ctx.font = `300 ${fAltDate}px ${canvasFontStack}`;
+    ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, localY + Math.max(28, Math.round(boxHeight * 0.13)));
     ctx.restore();
   }
+
   // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
   async function updateGeoData(lat, lng) {
     try {
@@ -312,7 +328,6 @@ window.addEventListener('DOMContentLoaded', () => {
     drawWatermark();
   }
 
-
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
     editorShell.classList.remove("hidden");
@@ -320,6 +335,7 @@ window.addEventListener('DOMContentLoaded', () => {
     void editorShell.offsetWidth;
     editorShell.classList.add("reveal-down");
   }
+
   function setGeoInputs(lat, lng, alt) {
     latitudeInput.value = lat?.toFixed(7) || "";
     longitudeInput.value = lng?.toFixed(7) || "";
@@ -333,6 +349,7 @@ window.addEventListener('DOMContentLoaded', () => {
       drawWatermark();
     }
   }
+
   function getLocation() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -345,18 +362,22 @@ window.addEventListener('DOMContentLoaded', () => {
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }
+
   latitudeInput?.addEventListener("input", () => {
     geoData.lat = Number(latitudeInput.value);
     drawWatermark();
   });
+
   longitudeInput?.addEventListener("input", () => {
     geoData.lng = Number(longitudeInput.value);
     drawWatermark();
   });
+
   altitudeInput?.addEventListener("input", () => {
     geoData.alt = Number(altitudeInput.value);
     drawWatermark();
   });
+
   function loadSelectedFile(file) {
     if (!file) return;
     const objectUrl = URL.createObjectURL(file);
@@ -376,28 +397,34 @@ window.addEventListener('DOMContentLoaded', () => {
     };
     sourceImage.src = objectUrl;
   }
+
   function requestPhotoSelection() {
     photoInput.click();
   }
+
   setInitialDateTimeInputs();
   restartClock();
+
   if (latitudeInput && longitudeInput && altitudeInput) {
     geoData.lat = Number(latitudeInput.value);
     geoData.lng = Number(longitudeInput.value);
     geoData.alt = Number(altitudeInput.value);
   }
+
   startUploadBtn.addEventListener("click", requestPhotoSelection);
   changePhotoBtn.addEventListener("click", requestPhotoSelection);
   photoInput.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     loadSelectedFile(file);
   });
+
   [dateInput, localTimeInput].forEach((input) => {
     input.addEventListener("input", () => {
       restartClock();
       drawWatermark();
     });
   });
+
   refreshBtn.addEventListener("click", drawWatermark);
   downloadBtn.addEventListener("click", () => {
     if (!hasImage) return;
