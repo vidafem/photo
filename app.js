@@ -197,16 +197,16 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch(() => {});
 
     // Plus Code
-    fetch(`https://plus.codes/api?address=${lat},${lng}`)
-      .then(r => r.json())
-      .then(pcData => {
-        geoData.plusCode = pcData.global_code || "";
-        drawWatermark();
-      })
-      .catch(() => {
-        geoData.plusCode = "";
-        drawWatermark();
-      });
+fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=es`)
+  .then(r => r.json())
+  .then(data => {
+    geoData.plusCode = data.plusCode || "";
+    drawWatermark();
+  })
+  .catch(() => {
+    geoData.plusCode = "";
+    drawWatermark();
+  });
   }
     function restartClock() {
     localClock = getLocalClockFromInputs();
