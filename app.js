@@ -221,53 +221,54 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- REFINAMIENTO: Bloque de marca flotante (DERECHA, sin borde, pegado) ---
+    // --- REFINAMIENTO FINAL: Bloque de marca flotante (Opacidad 60%, padding y bordes Camera Lite) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
-      const floatBoxX = boxWidth - floatBoxW - 10;
-      const floatBoxY = boxY - floatBoxH; // Pegado directamente (sin gap)
+      // Margen derecho aumentado a 16px para evitar recorte
+      const floatBoxX = boxWidth - floatBoxW - 16;
+      const floatBoxY = boxY - floatBoxH; 
 
-      // Fondo del cuadro (sin borde/stroke)
+      // Fondo del cuadro (Opacidad 60% para combinar con el grande)
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
-      ctx.fillStyle = "rgba(35, 35, 35, 0.85)";
+      ctx.fillStyle = "rgba(35, 35, 35, 0.6)";
       ctx.fill();
 
       // --- Estructura interna ---
-      const padding = 12;
-      const lSize = floatBoxH * 0.4; // Logo más pequeño
+      const paddingX = 14; // Más espacio lateral
+      const lSize = floatBoxH * 0.35; 
       const fGPSSize = Math.max(16, Math.round(floatBoxH * 0.28));
       const fLiteSize = Math.max(15, Math.round(floatBoxH * 0.28));
 
-      // 1. Logo (A la izquierda de GPS Map)
-      const contentStartX = floatBoxX + padding;
+      // 1. Logo (Con espacio lateral)
+      const contentStartX = floatBoxX + paddingX;
       const firstLineY = floatBoxY + floatBoxH * 0.38;
-      ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.8), lSize, lSize);
+      ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
       // 2. Texto "GPS Map" (A la derecha del logo)
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
       ctx.font = `600 ${fGPSSize}px ${canvasFontStack}`;
-      ctx.fillText("GPS Map", contentStartX + lSize + 8, firstLineY);
+      ctx.fillText("GPS Map", contentStartX + lSize + 10, firstLineY);
 
-      // 3. Cuadro blanco "Camera Lite" (Debajo del logo y GPS Map)
+      // 3. Cuadro blanco "Camera Lite" (Bordes redondeados y transparencia solicitada)
       const liteText = "Camera Lite";
       ctx.font = `700 ${fLiteSize}px ${canvasFontStack}`;
       const liteTextW = ctx.measureText(liteText).width;
       
-      const boxLiteW = liteTextW + 16; // Más espacio interno (padding)
+      const boxLiteW = liteTextW + 16; 
       const boxLiteH = fLiteSize + 8;
       const boxLiteX = contentStartX;
       const boxLiteY = floatBoxY + floatBoxH * 0.58;
 
-      // Cuadro blanco con 70% de transparencia y bordes redondeados
+      // Cuadro blanco con 70% de transparencia y BORDES REDONDEADOS (radius 4)
       ctx.beginPath();
-      ctx.roundRect(boxLiteX, boxLiteY, boxLiteW, boxLiteH, 4);
+      ctx.roundRect(boxLiteX, boxLiteY, boxLiteW, boxLiteH, 5); 
       ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
       ctx.fill();
 
-      // Texto negro con 60% de transparencia (rgba 0,0,0,0.6)
+      // Texto negro con 60% de transparencia (como pediste)
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
       ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
     }
