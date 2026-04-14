@@ -26,8 +26,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE ACTUALIZADA A ESTILO REDONDEADO (TIPO RIMOUSKI)
-  const canvasFontStack = '"Quicksand", "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
+  // FUENTE ACTUALIZADA: Redondeada y delgada (priorizando Quicksand-Light)
+  const canvasFontStack = '"Quicksand-Light", "Quicksand", "Arial Rounded MT Bold", sans-serif';
   let geoData = {
     lat: null,
     lng: null,
@@ -189,10 +189,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = `400 ${labelFontSize}px ${canvasFontStack}`;
+    ctx.font = `300 ${labelFontSize}px ${canvasFontStack}`;
     ctx.fillText(label, x, y);
     ctx.fillStyle = "#ffffff";
-    ctx.font = `400 ${valueFontSize}px ${canvasFontStack}`;
+    ctx.font = `300 ${valueFontSize}px ${canvasFontStack}`;
     ctx.fillText(value, x, y + valueFontSize + 6);
   }
   function drawWatermark() {
@@ -206,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro con bordes redondeados (60% opacidad)
+    // Fondo negro con bordes redondeados
     ctx.beginPath();
     const radius = 22;
     ctx.moveTo(boxX + radius, boxY);
@@ -222,20 +222,21 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- REFINAMIENTO: Bloque de marca flotante ---
+    // --- REFINAMIENTO: Bloque de marca flotante (Tipografía delgada y sin negrita, opacidad 70%) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
+      // Margen derecho aumentado a 16px para evitar recorte
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
       // Fondo del cuadro (Misma opacidad que el grande: 60%)
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
-      ctx.fillStyle = "rgba(35, 35, 35, 0.6)";
+      ctx.fillStyle = "rgba(35, 35, 35, 0.7)";
       ctx.fill();
 
-      // --- Estructura interna ---
+      // --- Estructura interna (Grosor de fuente light/300) ---
       const paddingX = 14; 
       const lSize = floatBoxH * 0.35; 
       const fGPSSize = Math.max(16, Math.round(floatBoxH * 0.28));
@@ -246,16 +247,17 @@ window.addEventListener('DOMContentLoaded', () => {
       const firstLineY = floatBoxY + floatBoxH * 0.38;
       ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
-      // 2. Texto "GPS Map" (A la derecha del logo con 2 espacios)
+      // 2. Texto "GPS Map" (A la derecha del logo con 2 espacios, grosor 300)
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
-      ctx.font = `600 ${fGPSSize}px ${canvasFontStack}`;
+      ctx.font = `300 ${fGPSSize}px ${canvasFontStack}`;
       // Añadimos espacios visuales separando el inicio del texto del logo
       ctx.fillText("GPS Map", contentStartX + lSize + 14, firstLineY);
 
       // 3. Cuadro blanco "Camera Lite" 
       const liteText = "Camera Lite";
-      ctx.font = `700 ${fLiteSize}px ${canvasFontStack}`;
+      // Grosor 400 para Camera Lite (delgado, no bold)
+      ctx.font = `400 ${fLiteSize}px ${canvasFontStack}`;
       const liteTextW = ctx.measureText(liteText).width;
       
       const boxLiteW = liteTextW + 16; 
@@ -281,44 +283,42 @@ window.addEventListener('DOMContentLoaded', () => {
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea: Plus code y dirección (Centro) ---
+    // --- Primera línea: Plus code y dirección (Centro, grosor 300) ---
     ctx.textAlign = "center";
-    ctx.font = `400 ${fPlusDir}px ${canvasFontStack}`;
+    ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     const plusDirY = boxY + Math.max(38, Math.round(boxHeight * 0.20));
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea: Latitude y Longitude ---
+    // --- Segunda línea: Latitude y Longitude (más grandes, grosor 300) ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    
-    // Latitud (Izquierda)
+    // Latitud
     ctx.textAlign = "left";
-    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
-    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-
-    // Longitud (Izquierda desde el centro)
+    // Longitud
     ctx.textAlign = "left";
-    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
-    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea: Local/GTM y Altitud/Fecha ---
+    // --- Tercera línea: Local/GTM y Altitud/Fecha (grosor 300) ---
     ctx.textAlign = "left";
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
-    
-    // Local y GTM (Izquierda)
-    ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
+    // Local y su hora
+    ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
 
     // Altitud y Día/Fecha (Izquierda desde el centro)
-    ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
+    ctx.font = `300 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
     ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
