@@ -177,44 +177,35 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // --- FUNCIÓN CORREGIDA (ÚNICA) ---
   async function updateGeoData(lat, lng) {
-    if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
+  if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
 
-    geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    drawWatermark();
+  geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
-    // Dirección
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
-      .then(r => r.json())
-      .then(data => {
-        let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
-        let cp = data.address.postcode || "";
-        let pais = data.address.country || "";
-        let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code) : "";
+  try {
+    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+    const data = await resp.json();
 
-        geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
-        drawWatermark();
-      })
-      .catch(() => {});
+    let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
+    let cp = data.address.postcode || "";
+    let pais = data.address.country || "";
+    let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code) : "";
 
+    geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
+  } catch {}
 
-// PLUS CODE REAL (ESTILO GOOGLE)
-fetch(`https://plus.codes/api?address=${lat},${lng}`)
-  .then(r => r.json())
-  .then(data => {
-    if (data.plus_code) {
-      geoData.plusCode = data.plus_code.global_code;
-
-      // ACORTAR estilo Google (R4F4+GQ)
-      geoData.plusCode = geoData.plusCode.substring(4, 11);
-    } else {
-      geoData.plusCode = "";
-    }
-    drawWatermark();
-  })
-  .catch(() => {
+  // ✅ PLUS CODE REAL (VERSIÓN CORRECTA)
+  try {
+    const olc = new OpenLocationCode();
+    const full = olc.encode(lat, lng);
+    const short = olc.shorten(full, lat, lng);
+    geoData.plusCode = short;
+  } catch (e) {
+    console.error("Error Plus Code:", e);
     geoData.plusCode = "";
-    drawWatermark();
-  });
+  }
+
+  drawWatermark();
+}
 
     function restartClock() {
     localClock = getLocalClockFromInputs();
