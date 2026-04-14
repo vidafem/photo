@@ -221,10 +221,31 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- Logo arriba derecha ---
+    // --- MODIFICACIÓN: Logo arriba izquierda y Texto ---
+    const colPad = Math.max(38, Math.round(boxWidth * 0.045));
+    const logoYOffset = 14; // Espacio desde la parte superior de la franja
+
+    // Medidas del logo
     const logoW = Math.max(60, Math.round(boxWidth * 0.09));
     const logoH = Math.round(logoW * logoImg.height / logoImg.width);
-    ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
+
+    // Dibujar logo a la izquierda (con colPad)
+    if (logoLoaded) {
+      ctx.drawImage(logoImg, boxX + colPad, boxY + logoYOffset, logoW, logoH);
+    }
+
+    // Dibujar texto a la derecha del logo
+    const textX = boxX + colPad + logoW + 12; // Gap de 12px después del logo
+    const fTitle = Math.max(26, Math.round(canvas.width * 0.040)); // Tamaño proporcional similar a Lat/Long value
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#fff";
+    ctx.font = `500 ${fTitle}px ${canvasFontStack}`; // Un poco más de grosor (500)
+    
+    // Centrar verticalmente el texto con respecto al logo
+    const textY = boxY + logoYOffset + (logoH / 2) + (fTitle / 2) - 2; 
+    ctx.fillText("GPS Map Camera Lite", textX, textY);
+
 
     // --- Configuración de tamaños de fuente proporcionales ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
@@ -244,7 +265,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
-    const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     // Latitud
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
