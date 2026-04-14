@@ -162,37 +162,31 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // --- Geocodificación inversa y plus code (REVISIÓN DE FALLOS) ---
+  // --- Geocodificación inversa y plus code (REINVENTADA PARA CERO ERRORES) ---
   async function updateGeoData(lat, lng) {
-    // Valor temporal por si la red falla
-    geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    if (!lat || !lng) return;
+    geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`; // Fallback inmediato
     drawWatermark();
 
-    // 1. Intentar Nominatim (Ciudad, CP, País)
-    try {
-      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
-      if (resp.ok) {
-        const data = await resp.json();
+    // 1. Obtener Dirección (Nominatim)
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
+      .then(r => r.json())
+      .then(data => {
         let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
         let cp = data.address.postcode || "";
         let pais = data.address.country || "";
         let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
         geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
-      }
-    } catch (e) { console.warn("Error dirección"); }
-    
-    drawWatermark();
+        drawWatermark();
+      }).catch(() => { /* Mantiene coordenadas */ });
 
-    // 2. Intentar Plus Code (Independiente)
-    try {
-      const pcResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
-      if (pcResp.ok) {
-        const pcData = await pcResp.json();
+    // 2. Obtener Plus Code (Independiente)
+    fetch(`https://plus.codes/api?address=${lat},${lng}`)
+      .then(r => r.json())
+      .then(pcData => {
         geoData.plusCode = pcData.global_code || "";
-      }
-    } catch (e) { geoData.plusCode = ""; }
-    
-    drawWatermark();
+        drawWatermark();
+      }).catch(() => { geoData.plusCode = ""; drawWatermark(); });
   }
 
   function restartClock() {
@@ -286,8 +280,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, (boxX + colPad) / 0.96, gmtY);
     
-    if (showNoteCheck.checked) {
-        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // RESTAURADO A TAMAÑO PEQUEÑO ORIGINAL
+    if (showNoteCheck && showNoteCheck.checked) {
+        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // Tamaño pequeño original
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.fillText("Nota: Capturada con GPS Map Camera Lite", (boxX + colPad) / 0.96, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
     }
@@ -373,7 +367,7 @@ window.addEventListener('DOMContentLoaded', () => {
     drawWatermark();
   });
 
-  showNoteCheck.addEventListener("change", drawWatermark);
+  showNoteCheck?.addEventListener("change", drawWatermark);
 
   function loadSelectedFile(file) {
     if (!file) return;
