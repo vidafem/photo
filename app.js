@@ -34,7 +34,7 @@ window.addEventListener('DOMContentLoaded', () => {
     lat: null,
     lng: null,
     alt: null,
-    plusCode: null,
+    plusCode: "Obteniendo...",
     direccion: null
   };
 
@@ -51,15 +51,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // --- Utilidades ---
   function getPlusCode(lat, lng) {
-    // Placeholder, para producción usar librería oficial
-    return "R4F4+GQH";
+    // Ya no devolvemos el valor fijo por defecto
+    return geoData.plusCode || "Cargando...";
   }
 
   // (llave eliminada)
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
   }
 
   function openMapModal() {
@@ -113,7 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
+  // Utilidades y lógica de la app
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -158,22 +158,22 @@ window.addEventListener('DOMContentLoaded', () => {
       lat: geoData.lat,
       lng: geoData.lng,
       alt: geoData.alt,
-      plusCode: geoData.plusCode || "R4F4+GQH",
-      direccion: geoData.direccion || "Guayaquil 090512, Ecuador 🇪🇨"
+      plusCode: geoData.plusCode,
+      direccion: geoData.direccion || "Cargando ubicación..."
     };
   }
 
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
-    // Plus code
+    // Plus code REAL mediante API
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
-      geoData.plusCode = plusCodeData.global_code || getPlusCode(lat, lng);
+      geoData.plusCode = plusCodeData.global_code || "No disponible";
     } catch {
-      geoData.plusCode = getPlusCode(lat, lng);
+      geoData.plusCode = "Error PlusCode";
     }
-    // Dirección (CORREGIDO: Ahora asegura la actualización de CP)
+    // Dirección, Ciudad y Código Postal
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
@@ -183,7 +183,7 @@ window.addEventListener('DOMContentLoaded', () => {
       let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
       geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
     } catch {
-      geoData.direccion = "";
+      geoData.direccion = "Ubicación desconocida";
     }
     drawWatermark();
   }
@@ -213,31 +213,24 @@ window.addEventListener('DOMContentLoaded', () => {
     const values = getOverlayValues();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-    // --- Medidas y estilos ---
+    
     const boxX = 0;
     const boxWidth = canvas.width;
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro principal (BORDES RECTOS, 50% OPACIDAD)
-    ctx.beginPath();
-    ctx.rect(boxX, boxY, boxWidth, boxHeight);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fill();
 
-    // --- BLOQUE FLOTANTE REFINADO (Negro 50%, Altura REDUCIDA, logo1.png) ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(50, Math.round(boxHeight * 0.32));
       const floatBoxX = boxWidth - floatBoxW; 
       const floatBoxY = boxY - floatBoxH; 
 
-      ctx.beginPath();
-      ctx.rect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
-      ctx.closePath();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; 
-      ctx.fill();
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
 
       const padding = 6;
       const imgW = floatBoxW - (padding * 2);
@@ -251,7 +244,6 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // AJUSTE: Tamaños de fuente ajustados (-1px)
     const fPlusDir = Math.max(21, Math.round(canvas.width * 0.034) - 1);
     const fLatLongLabel = Math.max(20, Math.round(canvas.width * 0.032) - 1);
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); 
@@ -308,9 +300,9 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
-      geoData.plusCode = plusCodeData.global_code || getPlusCode(lat, lng);
+      geoData.plusCode = plusCodeData.global_code || "Calculando...";
     } catch {
-      geoData.plusCode = getPlusCode(lat, lng);
+      geoData.plusCode = "Error API";
     }
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
