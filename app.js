@@ -37,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
     direccion: null
   };
 
-  // NUEVO LOGO COMPLETO (Sustituye a mapcam.webp)
+  // LOGO COMPLETO
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
@@ -225,26 +225,24 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- BLOQUE FLOTANTE CON LOGO COMPLETO (logo1.png) ---
+    // --- BLOQUE FLOTANTE REFINADO (Negro 60%, Altura reducida) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
-      const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
+      const floatBoxH = Math.max(65, Math.round(boxHeight * 0.42)); // Altura un poco más corta
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
-      // Cuadro de fondo (70% opacidad para el bloque flotante)
+      // Cuadro de fondo negro al 60%
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
-      ctx.fillStyle = "rgba(35, 35, 35, 0.7)"; 
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
       ctx.fill();
 
-      // Dibujar la imagen logo1.png centrada dentro del cuadro flotante
-      // Se escala para que quepa bien con un pequeño margen
-      const padding = 10;
+      // Dibujar logo1.png centrado
+      const padding = 8;
       const imgW = floatBoxW - (padding * 2);
       const imgH = Math.round(imgW * logoImg.height / logoImg.width);
       
-      // Ajustar si la altura calculada es mayor que la del cuadro
       let finalW = imgW;
       let finalH = imgH;
       if (finalH > floatBoxH - (padding * 2)) {
@@ -300,7 +298,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
+  // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
