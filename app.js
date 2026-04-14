@@ -55,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
     return cc
       .toUpperCase()
       .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
-  }
+  // (llave eliminada)
 
   function openMapModal() {
     mapModal.classList.remove("hidden");
