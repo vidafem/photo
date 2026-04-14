@@ -26,10 +26,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE ACTUALIZADA A VERDANA PARA EL RESTO DEL TEXTO
+  // FUENTE VERDANA PARA LA FRANJA DE DATOS
   const canvasFontStack = 'Verdana, Geneva, sans-serif';
-  // FUENTE ESPECÍFICA PARA EL LOGO (Oktah Round / Geométrica)
-  const logoFontStack = '"Oktah Round", "OktahRound-Light", "Montserrat", "Century Gothic", sans-serif';
 
   let geoData = {
     lat: null,
@@ -38,11 +36,13 @@ window.addEventListener('DOMContentLoaded', () => {
     plusCode: null,
     direccion: null
   };
-  // Logo
+
+  // NUEVO LOGO COMPLETO (Sustituye a mapcam.webp)
   const logoImg = new window.Image();
-  logoImg.src = 'mapcam.webp';
+  logoImg.src = 'logo1.png';
   let logoLoaded = false;
   logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
+
   // Leaflet
   let leafletMap = null;
   let leafletMarker = null;
@@ -225,54 +225,40 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- Bloque de marca flotante (Oktah Round / Opacidad 70%) ---
+    // --- BLOQUE FLOTANTE CON LOGO COMPLETO (logo1.png) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
+      // Cuadro de fondo (70% opacidad para el bloque flotante)
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
       ctx.fillStyle = "rgba(35, 35, 35, 0.7)"; 
       ctx.fill();
 
-      const paddingX = 14; 
-      const lSize = floatBoxH * 0.35; 
-      const fGPSSize = Math.max(16, Math.round(floatBoxH * 0.28));
-      const fLiteSize = Math.max(15, Math.round(floatBoxH * 0.28));
-
-      const contentStartX = floatBoxX + paddingX;
-      const firstLineY = floatBoxY + floatBoxH * 0.38;
+      // Dibujar la imagen logo1.png centrada dentro del cuadro flotante
+      // Se escala para que quepa bien con un pequeño margen
+      const padding = 10;
+      const imgW = floatBoxW - (padding * 2);
+      const imgH = Math.round(imgW * logoImg.height / logoImg.width);
       
-      // Logo con espacio lateral
-      ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
+      // Ajustar si la altura calculada es mayor que la del cuadro
+      let finalW = imgW;
+      let finalH = imgH;
+      if (finalH > floatBoxH - (padding * 2)) {
+          finalH = floatBoxH - (padding * 2);
+          finalW = Math.round(finalH * logoImg.width / logoImg.height);
+      }
 
-      ctx.textAlign = "left";
-      ctx.fillStyle = "#ffffff";
-      // FUENTE ESPECÍFICA Oktah Round
-      ctx.font = `300 ${fGPSSize}px ${logoFontStack}`;
-      ctx.fillText("GPS Map", contentStartX + lSize + 16, firstLineY);
+      const drawX = floatBoxX + (floatBoxW - finalW) / 2;
+      const drawY = floatBoxY + (floatBoxH - finalH) / 2;
 
-      // Camera Lite (Fondo blanco 70%, Texto negro 60%, Redondeado)
-      const liteText = "Camera Lite";
-      ctx.font = `400 ${fLiteSize}px ${logoFontStack}`;
-      const liteTextW = ctx.measureText(liteText).width;
-      const boxLiteW = liteTextW + 16; 
-      const boxLiteH = fLiteSize + 8;
-      const boxLiteX = contentStartX;
-      const boxLiteY = floatBoxY + floatBoxH * 0.58;
-
-      ctx.beginPath();
-      ctx.roundRect(boxLiteX, boxLiteY, boxLiteW, boxLiteH, 5); 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-      ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
+      ctx.drawImage(logoImg, drawX, drawY, finalW, finalH);
     }
 
-    // --- Configuración de la Franja Principal (Fuente VERDANA) ---
+    // --- Configuración de tamaños de fuente (VERDANA) ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
@@ -313,6 +299,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     ctx.restore();
   }
+
   // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
   async function updateGeoData(lat, lng) {
     try {
@@ -338,7 +325,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     drawWatermark();
   }
-
 
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
