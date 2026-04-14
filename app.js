@@ -221,12 +221,15 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- NUEVO: Cuadro flotante de Logo y Texto (Derecha, arriba de la franja) ---
+    // --- MODIFICACIÓN: Bloque de marca flotante (Izquierda, pegado a la franja) ---
     if (logoLoaded) {
+      const colPad = Math.max(38, Math.round(boxWidth * 0.045));
       const floatBoxW = Math.max(160, Math.round(boxWidth * 0.22));
       const floatBoxH = Math.max(65, Math.round(boxHeight * 0.45));
-      const floatBoxX = boxWidth - floatBoxW - 10;
-      const floatBoxY = boxY - floatBoxH - 5; // Separado un poco de la franja
+      
+      // Mover a la IZQUIERDA (usando colPad) y PEGAR más abajo (reducir gap)
+      const floatBoxX = boxX + colPad; 
+      const floatBoxY = boxY - floatBoxH - 2; // Separación mínima de 2px con la franja
 
       // Dibujar fondo del cuadro flotante
       ctx.beginPath();
@@ -237,34 +240,44 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Logo dentro del cuadro flotante (Izquierda del cuadro)
-      const lSize = floatBoxH * 0.7;
-      ctx.drawImage(logoImg, floatBoxX + 8, floatBoxY + (floatBoxH - lSize) / 2, lSize, lSize);
-
-      // Texto GPS Map Camera Lite
+      // --- Estructura interna: "GPS Map [Logo]" arriba, "Camera Lite" abajo del logo ---
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
+      
       const fGPSSize = Math.max(14, Math.round(floatBoxH * 0.25));
       const fLiteSize = Math.max(14, Math.round(floatBoxH * 0.28));
       
-      const textStartX = floatBoxX + 12 + lSize;
-      
-      // GPS Map
+      const contentStartX = floatBoxX + 10;
+      const firstLineY = floatBoxY + floatBoxH * 0.38;
+
+      // 1. Texto "GPS Map" (Primera línea)
       ctx.font = `600 ${fGPSSize}px ${canvasFontStack}`;
-      ctx.fillText("GPS Map", textStartX, floatBoxY + floatBoxH * 0.42);
+      ctx.fillText("GPS Map", contentStartX, firstLineY);
       
-      // Camera Lite (Fondo blanco para el texto inferior según referencia)
+      // 2. Logo (Al lado de "GPS Map", más pequeño)
+      const gpsWidth = ctx.measureText("GPS Map").width;
+      const logoStartX = contentStartX + gpsWidth + 8; // Gap de 8px
+      const lSize = floatBoxH * 0.35; // Logo un poco más pequeño que antes
+      ctx.drawImage(logoImg, logoStartX, firstLineY - (fGPSSize * 0.8), lSize, lSize);
+      
+      // 3. Texto "Camera Lite" (Segunda línea, JUSTO DEBAJO del logo)
       ctx.font = `700 ${fLiteSize}px ${canvasFontStack}`;
       const liteText = "Camera Lite";
+      
+      // Alinear "Camera Lite" para que empiece donde empieza el LOGO
+      const liteStartX = logoStartX - 2; // Ajuste fino para centrar el bloque blanco con el logo
+      const liteTextY = floatBoxY + floatBoxH * 0.78;
+      
       const liteW = ctx.measureText(liteText).width + 8;
       
+      // Fondo blanco para el texto inferior
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.roundRect(textStartX - 4, floatBoxY + floatBoxH * 0.55, liteW, fLiteSize + 4, 2);
+      ctx.roundRect(liteStartX - 4, liteTextY - (fLiteSize * 0.9), liteW, fLiteSize + 5, 2);
       ctx.fill();
       
       ctx.fillStyle = "#000000"; // Texto negro sobre fondo blanco
-      ctx.fillText(liteText, textStartX, floatBoxY + floatBoxH * 0.82);
+      ctx.fillText(liteText, liteStartX, liteTextY);
     }
 
     // --- Configuración de tamaños de fuente proporcionales ---
