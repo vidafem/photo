@@ -194,15 +194,14 @@ window.addEventListener('DOMContentLoaded', () => {
   } catch {}
 
   // ✅ PLUS CODE REAL (VERSIÓN CORRECTA)
-  try {
-    const olc = new OpenLocationCode();
-    const full = olc.encode(lat, lng);
-    const short = olc.shorten(full, lat, lng);
-    geoData.plusCode = short;
-  } catch (e) {
-    console.error("Error Plus Code:", e);
-    geoData.plusCode = "";
-  }
+try {
+  const full = OpenLocationCode.encode(lat, lng);
+  const short = OpenLocationCode.shorten(full, lat, lng);
+  geoData.plusCode = short;
+} catch (e) {
+  console.error("Error Plus Code:", e);
+  geoData.plusCode = "";
+}
 
   drawWatermark();
 }
