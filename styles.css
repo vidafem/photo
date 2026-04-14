@@ -226,6 +226,7 @@ h2 {
   color: var(--muted);
 }
 
+/* --- FILAS DE INPUTS --- */
 .input-row {
   display: flex;
   flex-wrap: wrap; 
@@ -234,64 +235,71 @@ h2 {
   align-items: flex-end;
 }
 
-/* Estilo para fila de opción */
+/* FILA DE OPCIÓN CHECKBOX */
 .option-row {
   align-items: center;
-  margin: 1rem 0;
+  margin: 1.2rem 0;
   background: #f8f9ff;
-  padding: 0.6rem;
-  border-radius: 10px;
+  padding: 0.7rem;
+  border-radius: 12px;
   border: 1px solid #eef0f7;
 }
 
 .option-row input[type="checkbox"] {
   width: auto;
-  margin-right: 0.5rem;
-}
-
-.option-row label {
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin-right: 0.6rem;
   cursor: pointer;
 }
 
+.option-row label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* GRUPOS DE CAMPOS */
 .field-group {
   flex: 1 1 calc(50% - 0.8rem); 
-  min-width: 140px; 
+  min-width: 145px; 
 }
 
 .geo-triple .field-group {
   flex: 1 1 calc(33.33% - 0.8rem);
-  min-width: 90px;
+  min-width: 95px;
 }
 
+/* BOTONES SECUNDARIOS EN FILA */
 .btn-row {
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
 
 .btn-row button {
   flex: 1;
   margin-bottom: 0 !important;
-  padding: 0.6rem 0.4rem;
-  font-size: 0.85rem;
+  padding: 0.65rem 0.5rem;
+  font-size: 0.86rem;
 }
 
 .refresh-action {
   background: var(--brand-2) !important;
   color: #fff !important;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
 }
 
+/* INPUTS COMPACTOS */
 input,
 select {
   width: 100%;
   border: 1px solid #d2d2d7;
   background: #fff;
   border-radius: 10px;
-  padding: 0.5rem;
+  padding: 0.55rem;
   font-size: 0.88rem;
   color: var(--ink);
+  letter-spacing: -0.01em;
 }
 
 input:focus,
@@ -313,6 +321,7 @@ output {
   font-size: 0.9rem;
 }
 
+/* SECCIÓN DE ACCIONES (BOTÓN DESCARGA) */
 .actions {
   margin-top: 1rem;
   display: grid;
@@ -322,14 +331,13 @@ output {
 button {
   border: none;
   border-radius: 12px;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 160ms ease, filter 160ms ease;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
 }
 
 .ghost-btn {
-  margin-bottom: 0; 
   color: var(--brand-2);
   background: #f2f8ff;
   border: 1px solid #cfe6ff;
@@ -337,7 +345,7 @@ button {
 
 button:hover {
   transform: translateY(-1px);
-  filter: saturate(1.05);
+  filter: saturate(1.08);
 }
 
 #refreshBtn {
@@ -348,14 +356,17 @@ button:hover {
 #downloadBtn {
   color: #fff;
   background: linear-gradient(120deg, #4dd96d, var(--ok));
+  box-shadow: 0 8px 20px rgba(52, 199, 89, 0.2);
 }
 
 #downloadBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
+/* VISTA PREVIA */
 .preview-panel {
   display: flex;
   flex-direction: column;
@@ -364,12 +375,12 @@ button:hover {
 .canvas-wrap {
   position: relative;
   flex: 1;
-  min-height: 280px;
+  min-height: 320px;
   border-radius: 14px;
   overflow: hidden;
   border: 1px dashed #c9d7eb;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(236, 244, 255, 0.75));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(236, 244, 255, 0.8));
 }
 
 canvas {
@@ -386,16 +397,19 @@ canvas {
   text-align: center;
   color: #6f6a61;
   padding: 1rem;
+  font-weight: 500;
 }
 
+/* RESPONSIVE */
 @media (min-width: 900px) {
   .workspace {
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
     align-items: start;
   }
 
   .panel {
-    padding: 1.2rem;
+    padding: 1.4rem;
   }
 
   .controls-panel {
@@ -404,10 +418,11 @@ canvas {
   }
 }
 
+/* ANIMACIONES */
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
