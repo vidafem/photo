@@ -26,9 +26,9 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE ORIGINAL PARA LA FRANJA
-  const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
-  // FUENTE ESPECÍFICA PARA EL LOGO: Oktah Round (con alternativas geométricas similares)
+  // FUENTE ACTUALIZADA A VERDANA PARA EL RESTO DEL TEXTO
+  const canvasFontStack = 'Verdana, Geneva, sans-serif';
+  // FUENTE ESPECÍFICA PARA EL LOGO (Oktah Round / Geométrica)
   const logoFontStack = '"Oktah Round", "OktahRound-Light", "Montserrat", "Century Gothic", sans-serif';
 
   let geoData = {
@@ -110,7 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app
+  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -225,7 +225,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- Bloque de marca flotante (Oktah Round, Opacidad 70%) ---
+    // --- Bloque de marca flotante (Oktah Round / Opacidad 70%) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
@@ -245,16 +245,16 @@ window.addEventListener('DOMContentLoaded', () => {
       const contentStartX = floatBoxX + paddingX;
       const firstLineY = floatBoxY + floatBoxH * 0.38;
       
-      // Logo (A la izquierda de GPS Map)
+      // Logo con espacio lateral
       ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
-      // GPS Map con Oktah Round (Peso 300 para ser fina)
+      // FUENTE ESPECÍFICA Oktah Round
       ctx.font = `300 ${fGPSSize}px ${logoFontStack}`;
       ctx.fillText("GPS Map", contentStartX + lSize + 16, firstLineY);
 
-      // Camera Lite (Cuadro blanco 70%, Texto negro 60%, Bordes redondeados)
+      // Camera Lite (Fondo blanco 70%, Texto negro 60%, Redondeado)
       const liteText = "Camera Lite";
       ctx.font = `400 ${fLiteSize}px ${logoFontStack}`;
       const liteTextW = ctx.measureText(liteText).width;
@@ -272,7 +272,7 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
     }
 
-    // --- Configuración de la Franja Principal (Fuente del Sistema) ---
+    // --- Configuración de la Franja Principal (Fuente VERDANA) ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
@@ -313,9 +313,8 @@ window.addEventListener('DOMContentLoaded', () => {
     
     ctx.restore();
   }
-  // --- Geocodificación inversa y plus code ---
+  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
   async function updateGeoData(lat, lng) {
-    // Plus code
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
@@ -323,7 +322,6 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
-    // Dirección
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
