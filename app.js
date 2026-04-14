@@ -37,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
     direccion: null
   };
 
-  // NUEVO LOGO COMPLETO (Sustituye a mapcam.webp)
+  // LOGO COMPLETO
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
@@ -58,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
 
   function openMapModal() {
@@ -112,7 +112,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
+  // Utilidades y lógica de la app
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -164,7 +164,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
-    // Plus code
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
@@ -172,7 +171,6 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
-    // Dirección
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
@@ -215,41 +213,30 @@ window.addEventListener('DOMContentLoaded', () => {
     const values = getOverlayValues();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+    
     // --- Medidas y estilos ---
     const boxX = 0;
     const boxWidth = canvas.width;
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro principal (60% opacidad)
-    ctx.beginPath();
-    const radius = 22;
-    ctx.moveTo(boxX + radius, boxY);
-    ctx.lineTo(boxX + boxWidth - radius, boxY);
-    ctx.quadraticCurveTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + radius);
-    ctx.lineTo(boxX + boxWidth, boxY + boxHeight - radius);
-    ctx.quadraticCurveTo(boxX + boxWidth, boxY + boxHeight, boxX + boxWidth - radius, boxY + boxHeight);
-    ctx.lineTo(boxX + radius, boxY + boxHeight);
-    ctx.quadraticCurveTo(boxX, boxY + boxHeight, boxX, boxY + boxHeight - radius);
-    ctx.lineTo(boxX, boxY + radius);
-    ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fill();
 
-    // --- BLOQUE FLOTANTE REFINADO (Negro 60%, Altura reducida, logo1.png) ---
+    // Franja principal (BORDES RECTOS, 50% OPACIDAD)
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+    // --- BLOQUE FLOTANTE (BORDES RECTOS, 50% OPACIDAD, PEGADO AL BORDE DERECHO) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
-      const floatBoxH = Math.max(60, Math.round(boxHeight * 0.40)); // Altura reducida
-      const floatBoxX = boxWidth - floatBoxW - 16;
+      const floatBoxH = Math.max(55, Math.round(boxHeight * 0.38)); // Altura reducida
+      const floatBoxX = boxWidth - floatBoxW; // Pegado al borde derecho
       const floatBoxY = boxY - floatBoxH; 
 
-      ctx.beginPath();
-      ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
-      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
-      ctx.fill();
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
 
-      const padding = 8;
+      // Dibujar logo1.png centrado dentro del bloque flotante
+      const padding = 6;
       const imgW = floatBoxW - (padding * 2);
       const imgH = Math.round(imgW * logoImg.height / logoImg.width);
       let finalW = imgW;
@@ -261,14 +248,13 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // --- Configuración de tamaños de fuente proporcionales (VERDANA) ---
+    // --- Configuración de fuentes ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea ---
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -276,7 +262,6 @@ window.addEventListener('DOMContentLoaded', () => {
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     ctx.textAlign = "left";
@@ -289,7 +274,6 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea ---
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
@@ -298,7 +282,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, localY + Math.max(28, Math.round(boxHeight * 0.13)));
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
     ctx.restore();
   }
 
@@ -317,10 +301,7 @@ window.addEventListener('DOMContentLoaded', () => {
       let ciudad = data.address.city || data.address.town || data.address.village || "";
       let cp = data.address.postcode || "";
       let pais = data.address.country || "";
-      let bandera = "";
-      if (data.address.country_code) {
-        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
-      }
+      let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
       geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
     } catch {
       geoData.direccion = "";
