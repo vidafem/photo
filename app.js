@@ -221,14 +221,13 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- MODIFICACIÓN: Bloque de marca flotante (Izquierda, pegado a la franja) ---
+    // --- CORRECCIÓN: Bloque de marca flotante (DERECHA, pegado a la franja) ---
     if (logoLoaded) {
-      const colPad = Math.max(38, Math.round(boxWidth * 0.045));
       const floatBoxW = Math.max(160, Math.round(boxWidth * 0.22));
       const floatBoxH = Math.max(65, Math.round(boxHeight * 0.45));
       
-      // Mover a la IZQUIERDA (usando colPad) y PEGAR más abajo (reducir gap)
-      const floatBoxX = boxX + colPad; 
+      // Mover a la DERECHA y PEGAR más abajo (reducir gap)
+      const floatBoxX = boxWidth - floatBoxW - 10;
       const floatBoxY = boxY - floatBoxH - 2; // Separación mínima de 2px con la franja
 
       // Dibujar fondo del cuadro flotante
@@ -240,7 +239,7 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // --- Estructura interna: "GPS Map [Logo]" arriba, "Camera Lite" abajo del logo ---
+      // --- Estructura interna: "GPS Map [Logo]" arriba, "Camera Lite" abajo ---
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
       
@@ -257,27 +256,24 @@ window.addEventListener('DOMContentLoaded', () => {
       // 2. Logo (Al lado de "GPS Map", más pequeño)
       const gpsWidth = ctx.measureText("GPS Map").width;
       const logoStartX = contentStartX + gpsWidth + 8; // Gap de 8px
-      const lSize = floatBoxH * 0.35; // Logo un poco más pequeño que antes
+      const lSize = floatBoxH * 0.35; // Logo un poco más pequeño para alinear con el texto
       ctx.drawImage(logoImg, logoStartX, firstLineY - (fGPSSize * 0.8), lSize, lSize);
       
-      // 3. Texto "Camera Lite" (Segunda línea, JUSTO DEBAJO del logo)
+      // 3. Texto "Camera Lite" (Segunda línea, JUSTO DEBAJO)
       ctx.font = `700 ${fLiteSize}px ${canvasFontStack}`;
-      const liteText = "Camera Lite";
-      
-      // Alinear "Camera Lite" para que empiece donde empieza el LOGO
-      const liteStartX = logoStartX - 2; // Ajuste fino para centrar el bloque blanco con el logo
       const liteTextY = floatBoxY + floatBoxH * 0.78;
       
+      const liteText = "Camera Lite";
       const liteW = ctx.measureText(liteText).width + 8;
       
       // Fondo blanco para el texto inferior
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.roundRect(liteStartX - 4, liteTextY - (fLiteSize * 0.9), liteW, fLiteSize + 5, 2);
+      ctx.roundRect(contentStartX - 4, liteTextY - (fLiteSize * 0.9), liteW, fLiteSize + 5, 2);
       ctx.fill();
       
       ctx.fillStyle = "#000000"; // Texto negro sobre fondo blanco
-      ctx.fillText(liteText, liteStartX, liteTextY);
+      ctx.fillText(liteText, contentStartX, liteTextY);
     }
 
     // --- Configuración de tamaños de fuente proporcionales ---
@@ -287,48 +283,52 @@ window.addEventListener('DOMContentLoaded', () => {
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea: Plus code y dirección (Centro) ---
+    // --- Primera línea: Plus code y dirección (misma línea, centrado, mismo tamaño, separado por coma) ---
     ctx.textAlign = "center";
     ctx.font = `400 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     const plusDirY = boxY + Math.max(38, Math.round(boxHeight * 0.20));
+    // Plus code y dirección juntos, coma antes de Guayaquil
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea: Latitude y Longitude ---
+    // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    
-    // Latitud (Izquierda)
+    // Latitud
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-
-    // Longitud (Izquierda desde el centro)
+    // Longitud
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea: Local/GTM y Altitud/Fecha ---
+    // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
-    
-    // Local y GTM (Izquierda)
+    // Local y su hora
     ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
+    // GMT y su hora debajo
+    ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
 
-    // Altitud y Día/Fecha (Izquierda desde el centro)
+    // Altitud y metros (misma línea, derecha, más grande)
+    ctx.textAlign = "left";
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
-    
+    // Día y fecha justo debajo de altitud, sin salto adicional
+    ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
+    const diaFechaY = localY + Math.max(28, Math.round(boxHeight * 0.13));
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, diaFechaY);
     ctx.restore();
   }
   // --- Geocodificación inversa y plus code ---
