@@ -197,16 +197,16 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch(() => {});
 
     // Plus Code
-fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=es`)
-  .then(r => r.json())
-  .then(data => {
-    geoData.plusCode = data.plusCode || "";
-    drawWatermark();
-  })
-  .catch(() => {
-    geoData.plusCode = "";
-    drawWatermark();
-  });
+// PLUS CODE REAL (igual a Google Maps)
+try {
+  const fullCode = OpenLocationCode.encode(lat, lng);
+  const shortCode = OpenLocationCode.shorten(fullCode, lat, lng);
+  geoData.plusCode = shortCode;
+} catch {
+  geoData.plusCode = "";
+}
+
+drawWatermark();
   }
     function restartClock() {
     localClock = getLocalClockFromInputs();
@@ -296,9 +296,9 @@ fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&
 
     // --- DIRECCIÓN + PLUS CODE ---
     const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
-    let dirLine = values.plusCode
-      ? `${values.plusCode}, ${values.direccion}`
-      : values.direccion;
+let dirLine = values.plusCode
+  ? `${values.plusCode} ${values.direccion}`
+  : values.direccion;
 
     ctx.fillText(dirLine, (boxX + boxWidth / 2) / 0.96, plusDirY);
 
