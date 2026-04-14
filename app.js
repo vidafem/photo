@@ -158,32 +158,41 @@ window.addEventListener('DOMContentLoaded', () => {
       lng: geoData.lng,
       alt: geoData.alt,
       plusCode: geoData.plusCode,
-      direccion: geoData.direccion || "Ubicación..."
+      direccion: geoData.direccion || "Cargando datos..."
     };
   }
 
-  // --- Geocodificación inversa y plus code (REVISADO) ---
+  // --- Geocodificación inversa y plus code (REVISIÓN DE FALLOS) ---
   async function updateGeoData(lat, lng) {
-    // 1. Intentar obtener dirección (Nominatim es más estable)
+    // Valor temporal por si la red falla
+    geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    drawWatermark();
+
+    // 1. Intentar Nominatim (Ciudad, CP, País)
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
-      const data = await resp.json();
-      let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
-      let cp = data.address.postcode || "";
-      let pais = data.address.country || "";
-      let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
-      geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
-    } catch (e) { geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`; }
+      if (resp.ok) {
+        const data = await resp.json();
+        let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
+        let cp = data.address.postcode || "";
+        let pais = data.address.country || "";
+        let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
+        geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
+      }
+    } catch (e) { console.warn("Error dirección"); }
     
     drawWatermark();
 
-    // 2. Intentar Plus Code por separado (Si falla, no bloquea lo anterior)
+    // 2. Intentar Plus Code (Independiente)
     try {
       const pcResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
-      const pcData = await pcResp.json();
-      geoData.plusCode = pcData.global_code || "";
-      drawWatermark();
+      if (pcResp.ok) {
+        const pcData = await pcResp.json();
+        geoData.plusCode = pcData.global_code || "";
+      }
     } catch (e) { geoData.plusCode = ""; }
+    
+    drawWatermark();
   }
 
   function restartClock() {
@@ -256,8 +265,8 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.setTransform(0.96, 0, 0, 1, 0, 0); 
     
     const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
-    let dirText = values.plusCode ? `${values.plusCode}, ${values.direccion}` : values.direccion;
-    ctx.fillText(dirText, (boxX + boxWidth / 2) / 0.96, plusDirY);
+    let dirLine = values.plusCode ? `${values.plusCode}, ${values.direccion}` : values.direccion;
+    ctx.fillText(dirLine, (boxX + boxWidth / 2) / 0.96, plusDirY);
 
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
@@ -301,8 +310,8 @@ window.addEventListener('DOMContentLoaded', () => {
       let ciudad = data.address.city || data.address.town || data.address.village || "";
       let cp = data.address.postcode || "";
       let pais = data.address.country || "";
-      let bandera = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
-      geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
+      let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code.toUpperCase()) : "";
+      geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
     } catch { geoData.direccion = ""; }
     try {
       const pcResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
