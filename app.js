@@ -197,14 +197,16 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch(() => {});
 
     // Plus Code
-// PLUS CODE REAL (igual a Google Maps)
+// PLUS CODE REAL
 try {
-  const fullCode = OpenLocationCode.encode(lat, lng);
-  const shortCode = OpenLocationCode.shorten(fullCode, lat, lng);
+  const fullCode = openlocationcode.encode(lat, lng);
+  const shortCode = openlocationcode.shorten(fullCode, lat, lng);
   geoData.plusCode = shortCode;
 } catch {
   geoData.plusCode = "";
 }
+
+drawWatermark();
 
 drawWatermark();
   }
