@@ -219,7 +219,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.save();
 
     // Franja principal (BORDES RECTOS, 50% OPACIDAD)
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
     // --- BLOQUE FLOTANTE (RECTO, 50% OPACIDAD, PEGADO DERECHA, ALTURA REDUCIDA) ---
@@ -229,7 +229,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const floatBoxX = boxWidth - floatBoxW; 
       const floatBoxY = boxY - floatBoxH; 
 
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
       ctx.fillRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
 
       const padding = 6;
