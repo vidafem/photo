@@ -19,6 +19,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const leafletMapDiv = document.getElementById("leafletMap");
   const acceptMapBtn = document.getElementById("acceptMapBtn");
   const closeMapBtn = document.getElementById("closeMapBtn");
+  const showNoteCheck = document.getElementById("showNoteCheck"); // NUEVO
 
   // --- Estado global ---
   const ctx = canvas.getContext("2d");
@@ -26,7 +27,6 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  // FUENTE VERDANA PARA LA FRANJA DE DATOS
   const canvasFontStack = 'Verdana, Geneva, sans-serif';
 
   let geoData = {
@@ -50,15 +50,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // --- Utilidades ---
   function getPlusCode(lat, lng) {
-    // Placeholder, para producción usar librería oficial
     return "R4F4+GQH";
   }
 
-  // (llave eliminada)
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
-      .replace(/./g, char => String.fromPoint(127397 + char.charCodeAt()));
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
 
   function openMapModal() {
@@ -112,7 +110,6 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
-  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -162,9 +159,7 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
-    // Plus code
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
       const plusCodeData = await plusCodeResp.json();
@@ -172,7 +167,6 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch {
       geoData.plusCode = getPlusCode(lat, lng);
     }
-    // Dirección
     try {
       const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
       const data = await resp.json();
@@ -212,31 +206,24 @@ window.addEventListener('DOMContentLoaded', () => {
     const values = getOverlayValues();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-    // --- Medidas y estilos ---
+    
     const boxX = 0;
     const boxWidth = canvas.width;
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro principal (BORDES RECTOS, 50% OPACIDAD)
-    ctx.beginPath();
-    ctx.rect(boxX, boxY, boxWidth, boxHeight);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fill();
 
-    // --- BLOQUE FLOTANTE REFINADO (Negro 50%, Altura REDUCIDA, logo1.png) ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(50, Math.round(boxHeight * 0.32));
       const floatBoxX = boxWidth - floatBoxW; 
       const floatBoxY = boxY - floatBoxH; 
 
-      ctx.beginPath();
-      ctx.rect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
-      ctx.closePath();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; 
-      ctx.fill();
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH);
 
       const padding = 6;
       const imgW = floatBoxW - (padding * 2);
@@ -250,22 +237,21 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // --- Configuración de tamaños de fuente proporcionales ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea ---
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
-    const plusDirY = boxY + Math.max(38, Math.round(boxHeight * 0.20));
+    
+    // POSICIÓN SUBIDA (ajustada del 0.20 original al 0.16 para que pegue al borde)
+    const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     ctx.textAlign = "left";
@@ -278,13 +264,21 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea ---
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
+    
+    // DIBUJO DE LA NOTA (si está activa)
+    if (showNoteCheck.checked) {
+        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // Un poco más pequeña
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.fillText("Nota: Capturada con GPS Map Camera Lite", boxX + colPad, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
+    }
+
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
     ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
@@ -363,6 +357,9 @@ window.addEventListener('DOMContentLoaded', () => {
     geoData.alt = Number(altitudeInput.value);
     drawWatermark();
   });
+
+  // ESCUCHAR CAMBIOS EN EL CHECKBOX
+  showNoteCheck.addEventListener("change", drawWatermark);
 
   function loadSelectedFile(file) {
     if (!file) return;
