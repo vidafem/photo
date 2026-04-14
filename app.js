@@ -197,23 +197,25 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch(() => {});
 
 
-// PLUS CODE REAL (CORREGIDO)
-try {
-  const olc = new OpenLocationCode();
+// PLUS CODE REAL (ESTILO GOOGLE)
+fetch(`https://plus.codes/api?address=${lat},${lng}`)
+  .then(r => r.json())
+  .then(data => {
+    if (data.plus_code) {
+      geoData.plusCode = data.plus_code.global_code;
 
-  const fullCode = olc.encode(lat, lng);
+      // ACORTAR estilo Google (R4F4+GQ)
+      geoData.plusCode = geoData.plusCode.substring(4, 11);
+    } else {
+      geoData.plusCode = "";
+    }
+    drawWatermark();
+  })
+  .catch(() => {
+    geoData.plusCode = "";
+    drawWatermark();
+  });
 
-  // IMPORTANTE: usar una referencia cercana para acortar (como hace Google Maps)
-  const shortCode = olc.shorten(fullCode, lat, lng);
-
-  geoData.plusCode = shortCode;
-} catch (e) {
-  console.error("Error Plus Code:", e);
-  geoData.plusCode = "";
-}
-
-drawWatermark();
-  }
     function restartClock() {
     localClock = getLocalClockFromInputs();
 
