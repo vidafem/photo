@@ -19,7 +19,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const leafletMapDiv = document.getElementById("leafletMap");
   const acceptMapBtn = document.getElementById("acceptMapBtn");
   const closeMapBtn = document.getElementById("closeMapBtn");
-  const showNoteCheck = document.getElementById("showNoteCheck"); // NUEVO
+  const showNoteCheck = document.getElementById("showNoteCheck");
 
   // --- Estado global ---
   const ctx = canvas.getContext("2d");
@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
+  // FUENTE VERDANA PARA LA FRANJA DE DATOS
   const canvasFontStack = 'Verdana, Geneva, sans-serif';
 
   let geoData = {
@@ -237,17 +238,17 @@ window.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
-    const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
-    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
-    const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
-    const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
+    // AJUSTE: Se resta 1px a etiquetas y textos (excepto valores Lat/Lng y Nota)
+    const fPlusDir = Math.max(21, Math.round(canvas.width * 0.034) - 1);
+    const fLatLongLabel = Math.max(20, Math.round(canvas.width * 0.032) - 1);
+    const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040)); // Se mantiene original
+    const fLocalGmt = Math.max(21, Math.round(canvas.width * 0.034) - 1);
+    const fAltDate = Math.max(20, Math.round(canvas.width * 0.032) - 1);
 
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     
-    // POSICIÓN SUBIDA (ajustada del 0.20 original al 0.16 para que pegue al borde)
     const plusDirY = boxY + Math.max(28, Math.round(boxHeight * 0.16));
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
@@ -270,9 +271,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
     
-    // DIBUJO DE LA NOTA (si está activa)
     if (showNoteCheck.checked) {
-        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // Un poco más pequeña
+        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`; // Se mantiene original
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.fillText("Nota: Capturada con GPS Map Camera Lite", boxX + colPad, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
     }
@@ -358,7 +358,6 @@ window.addEventListener('DOMContentLoaded', () => {
     drawWatermark();
   });
 
-  // ESCUCHAR CAMBIOS EN EL CHECKBOX
   showNoteCheck.addEventListener("change", drawWatermark);
 
   function loadSelectedFile(file) {
