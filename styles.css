@@ -226,26 +226,30 @@ h2 {
   color: var(--muted);
 }
 
-/* --- Nuevos estilos para filas de inputs --- */
+/* --- SOLUCIÓN AL ENCIMAMIENTO --- */
 .input-row {
   display: flex;
-  gap: 0.6rem;
+  flex-wrap: wrap; /* Permite bajar los campos si no caben */
+  gap: 0.8rem;
   margin-top: 0.7rem;
   align-items: flex-end;
 }
 
 .field-group {
-  flex: 1;
-  min-width: 0; /* Evita que los inputs desborden */
+  flex: 1 1 calc(50% - 0.8rem); /* Ocupa el 50% menos el gap */
+  min-width: 140px; /* Tamaño mínimo para no romperse */
 }
 
 /* Fila de 3 columnas para coordenadas */
 .geo-triple .field-group {
-  flex: 1;
+  flex: 1 1 calc(33.33% - 0.8rem);
+  min-width: 90px;
 }
 
 /* Fila de botones */
 .btn-row {
+  display: flex;
+  gap: 0.8rem;
   margin-bottom: 1rem;
 }
 
@@ -267,9 +271,9 @@ select {
   width: 100%;
   border: 1px solid #d2d2d7;
   background: #fff;
-  border-radius: 12px;
-  padding: 0.5rem 0.6rem; /* Padding reducido */
-  font-size: 0.88rem; /* Fuente un poco más pequeña */
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-size: 0.88rem;
   color: var(--ink);
 }
 
@@ -308,7 +312,7 @@ button {
 }
 
 .ghost-btn {
-  margin-bottom: 0.7rem;
+  margin-bottom: 0; /* Ajustado para filas */
   color: var(--brand-2);
   background: #f2f8ff;
   border: 1px solid #cfe6ff;
@@ -317,11 +321,6 @@ button {
 button:hover {
   transform: translateY(-1px);
   filter: saturate(1.05);
-}
-
-#applyBtn {
-  color: #fff;
-  background: linear-gradient(120deg, #3194ff, var(--brand-2));
 }
 
 #refreshBtn {
