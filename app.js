@@ -37,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
     direccion: null
   };
 
-  // NUEVO LOGO COMPLETO (Sustituye a mapcam.webp)
+  // NUEVO LOGO COMPLETO
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
