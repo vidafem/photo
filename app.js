@@ -199,10 +199,21 @@ window.addEventListener('DOMContentLoaded', () => {
   fetch(`https://plus.codes/api?address=${lat},${lng}`)
     .then(r => r.json())
     .then(data => {
-      const full = data.plus_code?.global_code || "";
-      const short = data.plus_code?.compound_code?.split(" ")[0] || "";
+const full = data.plus_code?.global_code || "";
+const short = data.plus_code?.compound_code?.split(" ")[0] || full;
 
-      geoData.plusCode = short || full || "";
+// 🔥 RECORTE PERSONALIZADO (LO QUE QUIERES)
+let finalCode = short;
+
+// Si es código largo tipo 6792R473+78
+if (finalCode.length > 8 && finalCode.includes("+")) {
+  const parts = finalCode.split("+");
+  const before = parts[0].slice(-4); // últimos 4 antes del +
+  const after = parts[1];
+  finalCode = `${before}+${after}`;
+}
+
+geoData.plusCode = finalCode;
       drawWatermark();
     })
     .catch(() => {
