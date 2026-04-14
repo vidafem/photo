@@ -26,7 +26,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let hasImage = false;
   let localClock = new Date();
   let clockIntervalId = null;
-  const canvasFontStack = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
+  // FUENTE ACTUALIZADA A ESTILO REDONDEADO (TIPO RIMOUSKI)
+  const canvasFontStack = '"Quicksand", "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
   let geoData = {
     lat: null,
     lng: null,
@@ -205,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-    // Fondo negro con bordes redondeados
+    // Fondo negro con bordes redondeados (60% opacidad)
     ctx.beginPath();
     const radius = 22;
     ctx.moveTo(boxX + radius, boxY);
@@ -221,22 +222,21 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- REFINAMIENTO FINAL: Bloque de marca flotante (Opacidad 60%, padding y bordes Camera Lite) ---
+    // --- REFINAMIENTO: Bloque de marca flotante ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
       const floatBoxH = Math.max(75, Math.round(boxHeight * 0.5));
-      // Margen derecho aumentado a 16px para evitar recorte
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
-      // Fondo del cuadro (Opacidad 60% para combinar con el grande)
+      // Fondo del cuadro (Misma opacidad que el grande: 60%)
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
       ctx.fillStyle = "rgba(35, 35, 35, 0.6)";
       ctx.fill();
 
       // --- Estructura interna ---
-      const paddingX = 14; // Más espacio lateral
+      const paddingX = 14; 
       const lSize = floatBoxH * 0.35; 
       const fGPSSize = Math.max(16, Math.round(floatBoxH * 0.28));
       const fLiteSize = Math.max(15, Math.round(floatBoxH * 0.28));
@@ -246,13 +246,14 @@ window.addEventListener('DOMContentLoaded', () => {
       const firstLineY = floatBoxY + floatBoxH * 0.38;
       ctx.drawImage(logoImg, contentStartX, firstLineY - (lSize * 0.85), lSize, lSize);
 
-      // 2. Texto "GPS Map" (A la derecha del logo)
+      // 2. Texto "GPS Map" (A la derecha del logo con 2 espacios)
       ctx.textAlign = "left";
       ctx.fillStyle = "#ffffff";
       ctx.font = `600 ${fGPSSize}px ${canvasFontStack}`;
-      ctx.fillText("GPS Map", contentStartX + lSize + 10, firstLineY);
+      // Añadimos espacios visuales separando el inicio del texto del logo
+      ctx.fillText("GPS Map", contentStartX + lSize + 14, firstLineY);
 
-      // 3. Cuadro blanco "Camera Lite" (Bordes redondeados y transparencia solicitada)
+      // 3. Cuadro blanco "Camera Lite" 
       const liteText = "Camera Lite";
       ctx.font = `700 ${fLiteSize}px ${canvasFontStack}`;
       const liteTextW = ctx.measureText(liteText).width;
@@ -262,13 +263,13 @@ window.addEventListener('DOMContentLoaded', () => {
       const boxLiteX = contentStartX;
       const boxLiteY = floatBoxY + floatBoxH * 0.58;
 
-      // Cuadro blanco con 70% de transparencia y BORDES REDONDEADOS (radius 4)
+      // Cuadro blanco (70% opacidad y bordes redondeados)
       ctx.beginPath();
       ctx.roundRect(boxLiteX, boxLiteY, boxLiteW, boxLiteH, 5); 
       ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
       ctx.fill();
 
-      // Texto negro con 60% de transparencia (como pediste)
+      // Texto negro (60% opacidad)
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
       ctx.fillText(liteText, boxLiteX + 8, boxLiteY + (boxLiteH * 0.75));
     }
