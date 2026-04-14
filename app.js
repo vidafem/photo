@@ -239,48 +239,50 @@ window.addEventListener('DOMContentLoaded', () => {
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea: Latitude y Longitude (grandes, alineados) ---
-    const labelFont = `500 ${Math.max(14, Math.round(canvas.width * 0.022))}px ${canvasFontStack}`;
-    const valueFont = `700 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
+    const labelFontBig = `700 ${Math.max(26, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
+    const valueFontNormal = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    // Latitude
+    // Latitud
     ctx.textAlign = "left";
-    ctx.font = labelFont;
+    ctx.font = labelFontBig;
     ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
-    ctx.font = valueFont;
-    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
-    // Longitude
+    ctx.font = valueFontNormal;
+    ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(28, Math.round(boxHeight * 0.15)));
+    // Longitud
     ctx.textAlign = "right";
-    ctx.font = labelFont;
+    ctx.font = labelFontBig;
     ctx.fillText("Longitud", boxX + boxWidth - colPad, sectionY);
-    ctx.font = valueFont;
-    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
+    ctx.font = valueFontNormal;
+    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(28, Math.round(boxHeight * 0.15)));
 
     // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
-    ctx.font = labelFont;
+    const localGmtFont = `700 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
+    const localGmtValueFont = `400 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     // Local y su hora
+    ctx.font = localGmtFont;
     ctx.fillText("Local", boxX + colPad, localY);
-    ctx.font = valueFont;
+    ctx.font = localGmtValueFont;
     ctx.fillText(values.local, boxX + colPad + ctx.measureText("Local ").width + 8, localY);
     // GMT y su hora debajo
-    ctx.font = labelFont;
-    const gmtY = localY + Math.max(22, Math.round(boxHeight * 0.09));
+    ctx.font = localGmtFont;
+    const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText("GTM", boxX + colPad, gmtY);
-    ctx.font = valueFont;
+    ctx.font = localGmtValueFont;
     ctx.fillText(values.gtm, boxX + colPad + ctx.measureText("GTM ").width + 8, gmtY);
 
-    // Altitude y metros (misma línea, derecha)
+    // Altitude y metros (misma línea, derecha, más grande)
     ctx.textAlign = "right";
-    ctx.font = labelFont;
+    ctx.font = labelFontBig;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxX + boxWidth - colPad, localY);
-    // Día y fecha (abajo derecha)
-    ctx.font = labelFont;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, gmtY + Math.max(28, Math.round(boxHeight * 0.13)));
+    // Día y fecha (abajo derecha, más grande)
+    ctx.font = labelFontBig;
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, gmtY + Math.max(32, Math.round(boxHeight * 0.15)));
     ctx.restore();
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
