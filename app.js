@@ -28,7 +28,6 @@ window.addEventListener('DOMContentLoaded', () => {
   let clockIntervalId = null;
   // FUENTE VERDANA PARA LA FRANJA DE DATOS
   const canvasFontStack = 'Verdana, Geneva, sans-serif';
-
   let geoData = {
     lat: null,
     lng: null,
@@ -36,13 +35,11 @@ window.addEventListener('DOMContentLoaded', () => {
     plusCode: null,
     direccion: null
   };
-
-  // LOGO COMPLETO
+  // Logo
   const logoImg = new window.Image();
   logoImg.src = 'logo1.png';
   let logoLoaded = false;
   logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
-
   // Leaflet
   let leafletMap = null;
   let leafletMarker = null;
@@ -225,44 +222,38 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fill();
 
-    // --- BLOQUE FLOTANTE REFINADO (Negro 60%, Altura reducida) ---
+    // --- BLOQUE FLOTANTE (Negro 60%, Altura reducida, logo1.png) ---
     if (logoLoaded) {
       const floatBoxW = Math.max(180, Math.round(boxWidth * 0.25));
-      const floatBoxH = Math.max(65, Math.round(boxHeight * 0.42)); // Altura un poco más corta
+      const floatBoxH = Math.max(60, Math.round(boxHeight * 0.40)); // Altura reducida
       const floatBoxX = boxWidth - floatBoxW - 16;
       const floatBoxY = boxY - floatBoxH; 
 
-      // Cuadro de fondo negro al 60%
       ctx.beginPath();
       ctx.roundRect(floatBoxX, floatBoxY, floatBoxW, floatBoxH, 6);
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
       ctx.fill();
 
-      // Dibujar logo1.png centrado
       const padding = 8;
       const imgW = floatBoxW - (padding * 2);
       const imgH = Math.round(imgW * logoImg.height / logoImg.width);
-      
       let finalW = imgW;
       let finalH = imgH;
       if (finalH > floatBoxH - (padding * 2)) {
           finalH = floatBoxH - (padding * 2);
           finalW = Math.round(finalH * logoImg.width / logoImg.height);
       }
-
-      const drawX = floatBoxX + (floatBoxW - finalW) / 2;
-      const drawY = floatBoxY + (floatBoxH - finalH) / 2;
-
-      ctx.drawImage(logoImg, drawX, drawY, finalW, finalH);
+      ctx.drawImage(logoImg, floatBoxX + (floatBoxW - finalW) / 2, floatBoxY + (floatBoxH - finalH) / 2, finalW, finalH);
     }
 
-    // --- Configuración de tamaños de fuente (VERDANA) ---
+    // --- Configuración de tamaños de fuente proporcionales (VERDANA) ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
+    // --- Primera línea ---
     ctx.textAlign = "center";
     ctx.font = `300 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -270,35 +261,32 @@ window.addEventListener('DOMContentLoaded', () => {
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
+    // --- Segunda línea ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    
     ctx.textAlign = "left";
     ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Latitud", boxX + colPad, sectionY);
     ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-
     ctx.font = `300 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
     ctx.font = `300 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
+    // --- Tercera línea ---
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
-
     ctx.font = `300 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
     ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
-    
     ctx.restore();
   }
-
-  // --- Geocodificación inversa y plus code ---
+  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN ORIGINAL) ---
   async function updateGeoData(lat, lng) {
     try {
       const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
@@ -323,6 +311,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     drawWatermark();
   }
+
 
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
