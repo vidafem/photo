@@ -189,10 +189,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = `500 ${labelFontSize}px ${canvasFontStack}`;
+    ctx.font = `400 ${labelFontSize}px ${canvasFontStack}`;
     ctx.fillText(label, x, y);
     ctx.fillStyle = "#ffffff";
-    ctx.font = `700 ${valueFontSize}px ${canvasFontStack}`;
+    ctx.font = `400 ${valueFontSize}px ${canvasFontStack}`;
     ctx.fillText(value, x, y + valueFontSize + 6);
   }
   function drawWatermark() {
@@ -223,7 +223,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fill();
 
     // --- Logo arriba derecha ---
-    if (logoLoaded) {
+      const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
       const logoW = Math.max(60, Math.round(boxWidth * 0.09));
       const logoH = Math.round(logoW * logoImg.height / logoImg.width);
       ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
