@@ -262,25 +262,28 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = valueFont;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(24, Math.round(boxHeight * 0.13)));
 
-    // --- Cuarta línea: Local/GMT y Altitude/Fecha ---
-    // Local y GMT (izquierda, uno debajo del otro)
+    // --- Cuarta línea: Local y GMT juntos, Altitude y fecha ---
+    // Local y GMT (misma línea, izquierda)
     ctx.textAlign = "left";
     ctx.font = labelFont;
-    ctx.fillText("Local", boxX + colPad, sectionY + Math.max(56, Math.round(boxHeight * 0.32)));
-    ctx.font = valueFont;
-    ctx.fillText(values.local, boxX + colPad, sectionY + Math.max(76, Math.round(boxHeight * 0.41)));
-    ctx.font = labelFont;
-    ctx.fillText("GTM", boxX + colPad, sectionY + Math.max(102, Math.round(boxHeight * 0.54)));
-    ctx.font = valueFont;
-    ctx.fillText(values.gtm, boxX + colPad, sectionY + Math.max(122, Math.round(boxHeight * 0.62)));
+    const localGmtY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
+    const localLabel = "Local ";
+    const gmtLabel = "GTM ";
+    const localText = localLabel + values.local;
+    const gmtText = gmtLabel + values.gtm;
+    ctx.fillText(localText, boxX + colPad, localGmtY);
+    // Espacio entre Local y GMT
+    const localWidth = ctx.measureText(localText).width;
+    ctx.fillText(gmtText, boxX + colPad + localWidth + 32, localGmtY);
+
     // Altitude y fecha (derecha, uno debajo del otro)
     ctx.textAlign = "right";
     ctx.font = labelFont;
-    ctx.fillText("Altitude", boxX + boxWidth - colPad, sectionY + Math.max(56, Math.round(boxHeight * 0.32)));
+    ctx.fillText("Altitude", boxX + boxWidth - colPad, localGmtY - Math.max(8, Math.round(boxHeight * 0.03)));
     ctx.font = valueFont;
-    ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, sectionY + Math.max(76, Math.round(boxHeight * 0.41)));
+    ctx.fillText((values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " meters" : "-", boxX + boxWidth - colPad, localGmtY + Math.max(18, Math.round(boxHeight * 0.09)));
     ctx.font = labelFont;
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, sectionY + Math.max(122, Math.round(boxHeight * 0.62)));
+    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, localGmtY + Math.max(44, Math.round(boxHeight * 0.18)));
     ctx.restore();
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
