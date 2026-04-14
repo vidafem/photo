@@ -39,7 +39,6 @@ window.addEventListener('DOMContentLoaded', () => {
   logoImg.src = 'mapcam.webp';
   let logoLoaded = false;
   logoImg.onload = () => { logoLoaded = true; drawWatermark(); };
-
   // Leaflet
   let leafletMap = null;
   let leafletMarker = null;
@@ -50,13 +49,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // Placeholder, para producción usar librería oficial
     return "R4F4+GQH";
   }
-
+  // (llave eliminada)
   function countryCodeToFlag(cc) {
     return cc
       .toUpperCase()
       .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
-
   function openMapModal() {
     mapModal.classList.remove("hidden");
     setTimeout(() => {
@@ -108,6 +106,7 @@ window.addEventListener('DOMContentLoaded', () => {
     closeMapModal();
   });
 
+  // Utilidades y lógica de la app (idéntico a la versión previa, solo movido dentro del bloque)
   function pad2(value) {
     return String(value).padStart(2, "0");
   }
@@ -177,7 +176,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     drawWatermark();
   }
-
   function restartClock() {
     localClock = getLocalClockFromInputs();
     if (clockIntervalId) {
@@ -188,21 +186,27 @@ window.addEventListener('DOMContentLoaded', () => {
       drawWatermark();
     }, 1000);
   }
+  function drawOverlayLabelValue(label, value, x, y, labelFontSize, valueFontSize) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = `400 ${labelFontSize}px ${canvasFontStack}`;
+    ctx.fillText(label, x, y);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `400 ${valueFontSize}px ${canvasFontStack}`;
+    ctx.fillText(value, x, y + valueFontSize + 6);
+  }
 
   function drawWatermark() {
     if (!hasImage) return;
     const values = getOverlayValues();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-
     // --- Medidas y estilos ---
     const boxX = 0;
     const boxWidth = canvas.width;
     const boxHeight = Math.max(140, Math.round(canvas.height * 0.23));
     const boxY = canvas.height - boxHeight;
     ctx.save();
-
-    // Fondo negro
+    // Fondo negro con bordes redondeados
     ctx.beginPath();
     const radius = 22;
     ctx.moveTo(boxX + radius, boxY);
@@ -223,14 +227,14 @@ window.addEventListener('DOMContentLoaded', () => {
     const logoH = Math.round(logoW * logoImg.height / logoImg.width);
     ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
 
-    // --- AJUSTE DE FUENTES SOLICITADO ---
+    // --- Configuración de tamaños de fuente proporcionales ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
     const fAltDate = Math.max(22, Math.round(canvas.width * 0.048));
 
-    // --- Primera línea: Plus code y dirección ---
+    // --- Primera línea: Plus code y dirección (misma línea, centrado) ---
     ctx.textAlign = "center";
     ctx.font = `400 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
@@ -242,39 +246,67 @@ window.addEventListener('DOMContentLoaded', () => {
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     
-    // Latitud
+    // Latitud (Izquierda)
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-    
-    // Longitud
-    ctx.textAlign = "right";
-    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
-    ctx.fillText("Longitud", boxX + boxWidth - colPad, sectionY);
-    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
-    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxX + boxWidth - colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea: Local y GMT ---
+    // Longitud (Izquierda desde el centro)
+    ctx.textAlign = "left";
+    ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillText("Longitud", boxWidth / 2, sectionY);
+    ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
+    ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
+
+    // --- Tercera línea: Local/GTM y Altitud/Fecha ---
     ctx.textAlign = "left";
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
+    
+    // Local y GTM (Izquierda)
     ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
-    
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
 
-    // --- Altitud y Fecha ---
-    ctx.textAlign = "right";
+    // Altitud y Día/Fecha (Izquierda desde el centro)
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
-    ctx.fillText(altText, boxX + boxWidth - colPad, localY);
-    
-    const diaFechaY = localY + Math.max(28, Math.round(boxHeight * 0.13));
-    ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, diaFechaY);
+    ctx.fillText(altText, boxWidth / 2, localY);
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
     
     ctx.restore();
+  }
+
+  // --- Geocodificación inversa y plus code (DUPLICADO SEGÚN TU ORIGINAL) ---
+  async function updateGeoData(lat, lng) {
+    // Plus code
+    try {
+      const plusCodeResp = await fetch(`https://plus.codes/api?address=${lat},${lng}`);
+      const plusCodeData = await plusCodeResp.json();
+      geoData.plusCode = plusCodeData.global_code || getPlusCode(lat, lng);
+    } catch {
+      geoData.plusCode = getPlusCode(lat, lng);
+    }
+    // Dirección
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+      const data = await resp.json();
+      let ciudad = data.address.city || data.address.town || data.address.village || "";
+      let cp = data.address.postcode || "";
+      let pais = data.address.country || "";
+      let bandera = "";
+      if (data.address.country_code) {
+        // Bandera emoji
+        bandera = countryCodeToFlag(data.address.country_code.toUpperCase());
+      }
+      geoData.direccion = `${ciudad} ${cp}, ${pais} ${bandera}`.trim();
+    } catch {
+      geoData.direccion = "";
+    }
+    drawWatermark();
   }
 
   function showEditorWithSwipe() {
@@ -284,7 +316,6 @@ window.addEventListener('DOMContentLoaded', () => {
     void editorShell.offsetWidth;
     editorShell.classList.add("reveal-down");
   }
-
   function setGeoInputs(lat, lng, alt) {
     latitudeInput.value = lat?.toFixed(7) || "";
     longitudeInput.value = lng?.toFixed(7) || "";
@@ -298,7 +329,6 @@ window.addEventListener('DOMContentLoaded', () => {
       drawWatermark();
     }
   }
-
   function getLocation() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -311,7 +341,6 @@ window.addEventListener('DOMContentLoaded', () => {
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }
-
   latitudeInput?.addEventListener("input", () => {
     geoData.lat = Number(latitudeInput.value);
     drawWatermark();
@@ -324,7 +353,6 @@ window.addEventListener('DOMContentLoaded', () => {
     geoData.alt = Number(altitudeInput.value);
     drawWatermark();
   });
-
   function loadSelectedFile(file) {
     if (!file) return;
     const objectUrl = URL.createObjectURL(file);
@@ -344,34 +372,28 @@ window.addEventListener('DOMContentLoaded', () => {
     };
     sourceImage.src = objectUrl;
   }
-
   function requestPhotoSelection() {
     photoInput.click();
   }
-
   setInitialDateTimeInputs();
   restartClock();
-
   if (latitudeInput && longitudeInput && altitudeInput) {
     geoData.lat = Number(latitudeInput.value);
     geoData.lng = Number(longitudeInput.value);
     geoData.alt = Number(altitudeInput.value);
   }
-
   startUploadBtn.addEventListener("click", requestPhotoSelection);
   changePhotoBtn.addEventListener("click", requestPhotoSelection);
   photoInput.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     loadSelectedFile(file);
   });
-
   [dateInput, localTimeInput].forEach((input) => {
     input.addEventListener("input", () => {
       restartClock();
       drawWatermark();
     });
   });
-
   refreshBtn.addEventListener("click", drawWatermark);
   downloadBtn.addEventListener("click", () => {
     if (!hasImage) return;
