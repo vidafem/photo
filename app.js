@@ -231,7 +231,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Primera línea: Plus code y dirección (misma línea, centrado, mismo tamaño, separado por coma) ---
-    const plusDirFont = `700 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     ctx.textAlign = "center";
     ctx.font = plusDirFont;
     ctx.fillStyle = "#fff";
@@ -241,7 +241,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
     // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
-    const labelFontBig = `700 ${Math.max(26, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
+    const labelFontBig = `400 ${Math.max(26, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
     const valueFontNormal = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
@@ -261,7 +261,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
-    const localGmtFont = `700 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
+    const localGmtFont = `400 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
     const localGmtValueFont = `400 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     // Local y su hora
