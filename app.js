@@ -287,7 +287,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(`GTM ${values.gtm}`, (boxX + colPad) / 0.96, gmtY);
     
     if (showNoteCheck.checked) {
-        ctx.font = `300 ${fAltDate * 0.8}px ${canvasFontStack}`;
+        ctx.font = `300 ${fLocalGmt}px ${canvasFontStack}`; // IGUALADO A LOCAL/GTM
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.fillText("Nota: Capturada con GPS Map Camera Lite", (boxX + colPad) / 0.96, gmtY + Math.max(22, Math.round(boxHeight * 0.12)));
     }
@@ -326,7 +326,7 @@ window.addEventListener('DOMContentLoaded', () => {
     editorShell.classList.remove("hidden");
     editorShell.classList.remove("reveal-down");
     void editorShell.offsetWidth;
-    editorShell.classList.add("reveal-down");
+    editorShell.classList.add("rise");
   }
 
   function setGeoInputs(lat, lng, alt) {
