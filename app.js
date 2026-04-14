@@ -196,17 +196,21 @@ window.addEventListener('DOMContentLoaded', () => {
       })
       .catch(() => {});
 
-    // Plus Code
-// PLUS CODE REAL
+
+// PLUS CODE REAL (CORREGIDO)
 try {
-  const fullCode = openlocationcode.encode(lat, lng);
-  const shortCode = openlocationcode.shorten(fullCode, lat, lng);
+  const olc = new OpenLocationCode();
+
+  const fullCode = olc.encode(lat, lng);
+
+  // IMPORTANTE: usar una referencia cercana para acortar (como hace Google Maps)
+  const shortCode = olc.shorten(fullCode, lat, lng);
+
   geoData.plusCode = shortCode;
-} catch {
+} catch (e) {
+  console.error("Error Plus Code:", e);
   geoData.plusCode = "";
 }
-
-drawWatermark();
 
 drawWatermark();
   }
