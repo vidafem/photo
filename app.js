@@ -175,37 +175,41 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // --- FUNCIÓN CORREGIDA (ÚNICA) ---
   async function updateGeoData(lat, lng) {
   if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
 
   geoData.direccion = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-  try {
-    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
-    const data = await resp.json();
-
-    let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
-    let cp = data.address.postcode || "";
-    let pais = data.address.country || "";
-    let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code) : "";
-
-    geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
-  } catch {}
-
-  // ✅ PLUS CODE REAL (VERSIÓN CORRECTA)
-try {
-  const full = OpenLocationCode.encode(lat, lng);
-  const short = OpenLocationCode.shorten(full, lat, lng);
-  geoData.plusCode = short;
-} catch (e) {
-  console.error("Error Plus Code:", e);
-  geoData.plusCode = "";
-}
-
   drawWatermark();
-}
 
+  // DIRECCIÓN
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`)
+    .then(r => r.json())
+    .then(data => {
+      let ciudad = data.address.city || data.address.town || data.address.village || data.address.suburb || "";
+      let cp = data.address.postcode || "";
+      let pais = data.address.country || "";
+      let cc = data.address.country_code ? countryCodeToFlag(data.address.country_code) : "";
+
+      geoData.direccion = `${ciudad} ${cp}, ${pais} ${cc}`.trim();
+      drawWatermark();
+    })
+    .catch(() => {});
+
+  // PLUS CODE (SIN LIBRERÍA 🔥)
+  fetch(`https://plus.codes/api?address=${lat},${lng}`)
+    .then(r => r.json())
+    .then(data => {
+      const full = data.plus_code?.global_code || "";
+      const short = data.plus_code?.compound_code?.split(" ")[0] || "";
+
+      geoData.plusCode = short || full || "";
+      drawWatermark();
+    })
+    .catch(() => {
+      geoData.plusCode = "";
+      drawWatermark();
+    });
+}
     function restartClock() {
     localClock = getLocalClockFromInputs();
 
