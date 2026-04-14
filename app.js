@@ -194,7 +194,6 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.font = `400 ${valueFontSize}px ${canvasFontStack}`;
     ctx.fillText(value, x, y + valueFontSize + 6);
   }
-
   function drawWatermark() {
     if (!hasImage) return;
     const values = getOverlayValues();
@@ -227,59 +226,61 @@ window.addEventListener('DOMContentLoaded', () => {
     const logoH = Math.round(logoW * logoImg.height / logoImg.width);
     ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
 
-    // --- Configuración de tamaños de fuente corregidos ---
+    // --- Configuración de tamaños de fuente proporcionales ---
     const fPlusDir = Math.max(22, Math.round(canvas.width * 0.034));
     const fLatLongLabel = Math.max(21, Math.round(canvas.width * 0.032));
     const fLatLongValue = Math.max(26, Math.round(canvas.width * 0.040));
     const fLocalGmt = Math.max(22, Math.round(canvas.width * 0.034));
-    // Ajustado para que coincida con el peso visual de Lat/Long Value
-    const fAltDate = Math.max(26, Math.round(canvas.width * 0.040));
+    const fAltDate = Math.max(21, Math.round(canvas.width * 0.032));
 
-    // --- Primera línea: Plus code y dirección (Centro) ---
+    // --- Primera línea: Plus code y dirección (misma línea, centrado, mismo tamaño, separado por coma) ---
     ctx.textAlign = "center";
     ctx.font = `400 ${fPlusDir}px ${canvasFontStack}`;
     ctx.fillStyle = "#fff";
     const plusDirY = boxY + Math.max(38, Math.round(boxHeight * 0.20));
+    // Plus code y dirección juntos, coma antes de Guayaquil
     let direccionCompleta = `${values.plusCode}, ${values.direccion}`;
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
-    // --- Segunda línea: Latitude y Longitude ---
+    // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
-    
-    // Latitud (Izquierda)
+    // Latitud
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
+    ctx.fillStyle = "#fff";
     ctx.fillText("Latitud", boxX + colPad, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lat !== null ? values.lat.toFixed(6) + "°" : "-", boxX + colPad, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
-
-    // Longitud (Izquierda desde el centro)
+    // Longitud
     ctx.textAlign = "left";
     ctx.font = `400 ${fLatLongLabel}px ${canvasFontStack}`;
     ctx.fillText("Longitud", boxWidth / 2, sectionY);
     ctx.font = `400 ${fLatLongValue}px ${canvasFontStack}`;
     ctx.fillText(values.lng !== null ? values.lng.toFixed(6) + "°" : "-", boxWidth / 2, sectionY + Math.max(32, Math.round(boxHeight * 0.15)));
 
-    // --- Tercera línea: Local/GTM y Altitud/Fecha ---
+    // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
-    
-    // Local y GTM (Izquierda)
+    // Local y su hora
     ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
     ctx.fillText(`Local ${values.local}`, boxX + colPad, localY);
+    // GMT y su hora debajo
+    ctx.font = `400 ${fLocalGmt}px ${canvasFontStack}`;
     const gmtY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(`GTM ${values.gtm}`, boxX + colPad, gmtY);
 
-    // Altitud y Día/Fecha (Izquierda desde el centro)
+    // Altitud y metros (misma línea, derecha, más grande)
+    ctx.textAlign = "left";
     ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxWidth / 2, localY);
-    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, gmtY);
-    
+    // Día y fecha justo debajo de altitud, sin salto adicional
+    ctx.font = `400 ${fAltDate}px ${canvasFontStack}`;
+    const diaFechaY = localY + Math.max(28, Math.round(boxHeight * 0.13));
+    ctx.fillText(values.day + ", " + values.date, boxWidth / 2, diaFechaY);
     ctx.restore();
   }
-
   // --- Geocodificación inversa y plus code ---
   async function updateGeoData(lat, lng) {
     // Plus code
@@ -308,6 +309,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     drawWatermark();
   }
+
 
   function showEditorWithSwipe() {
     startScreen.classList.add("hidden");
