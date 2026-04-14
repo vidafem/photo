@@ -223,7 +223,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fill();
 
     // --- Logo arriba derecha ---
-    const plusDirFont = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    const plusDirFont = `400 ${Math.max(23, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     const logoW = Math.max(60, Math.round(boxWidth * 0.09));
     const logoH = Math.round(logoW * logoImg.height / logoImg.width);
     ctx.drawImage(logoImg, boxX + boxWidth - logoW - 16, boxY + 14, logoW, logoH);
@@ -238,8 +238,8 @@ window.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(direccionCompleta, boxX + boxWidth / 2, plusDirY);
 
     // --- Segunda línea: Latitude y Longitude (más grandes, alineados) ---
-    const labelFontBig = `400 ${Math.max(26, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
-    const valueFontNormal = `400 ${Math.max(20, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
+    const labelFontBig = `400 ${Math.max(21, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
+    const valueFontNormal = `400 ${Math.max(23, Math.round(canvas.width * 0.034))}px ${canvasFontStack}`;
     const sectionY = plusDirY + Math.max(28, Math.round(boxHeight * 0.18));
     const colPad = Math.max(38, Math.round(boxWidth * 0.045));
     // Latitud
@@ -258,8 +258,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Tercera línea: Local y su hora en una línea, debajo GMT y su hora, ambos alineados a la izquierda ---
     ctx.textAlign = "left";
-    const localGmtFont = `400 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
-    const localGmtValueFont = `400 ${Math.max(22, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
+    const localGmtFont = `400 ${Math.max(21, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
+    const localGmtValueFont = `400 ${Math.max(21, Math.round(canvas.width * 0.038))}px ${canvasFontStack}`;
     const localY = sectionY + Math.max(62, Math.round(boxHeight * 0.36));
     // Local y su hora
     ctx.font = localGmtFont;
@@ -275,11 +275,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Altitud y metros (misma línea, derecha, más grande)
     ctx.textAlign = "right";
-    ctx.font = labelFontBig;
+    ctx.font = `400 ${Math.max(21, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
     const altText = `Altitud ${(values.alt !== null && !isNaN(values.alt)) ? values.alt.toFixed(0) + " metros" : "-"}`;
     ctx.fillText(altText, boxX + boxWidth - colPad, localY);
     // Día y fecha justo debajo de altitud, sin salto adicional
-    ctx.font = labelFontBig;
+    ctx.font = `400 ${Math.max(21, Math.round(canvas.width * 0.048))}px ${canvasFontStack}`;
     const diaFechaY = localY + Math.max(28, Math.round(boxHeight * 0.13));
     ctx.fillText(values.day + ", " + values.date, boxX + boxWidth - colPad, diaFechaY);
     ctx.restore();
